@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+/* Custom Netflix color variables for v4 */
+@theme {
+  --color-netflix-red: #E50914;
+  --color-netflix-red-dark: #B81D24;
+  --color-netflix-black: #000000;
+  --color-netflix-gray-dark: #141414;
+  --color-netflix-gray-medium: #2F2F2F;
+  --color-netflix-gray-light: #767676;
+  
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+}
+
+/* Custom keyframes */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes slideUp {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
 /* Custom styles can go here */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
