@@ -7,7 +7,7 @@ A beautiful streaming platform interface that secretly powers your personal medi
 ![App](https://img.shields.io/badge/app-Electron-brightgreen.svg)
 ![Download](https://img.shields.io/badge/download-NiluFlix.dmg-blue.svg)
 
-## 📥 **Quick Install (Grandma-Friendly)**
+## 📥 **Quick Install (Boomer-Friendly)**
 
 1. **Download**: [NiluFlix.dmg](https://github.com/yourusername/niluflix/releases/latest)
 2. **Install**: Double-click and drag to Applications
@@ -75,7 +75,8 @@ Want to control your downloads from anywhere? **One-click remote access:**
 
 ### Backend (Bundled in App)
 - **Node.js** with Express (auto-starts with app)
-- **SQLite** for local database
+- **SQLite** for local desktop database
+- **Supabase** for web interface database
 - **Prisma** ORM for database management
 
 ### Torrenting (Auto-Configured)
@@ -90,6 +91,7 @@ Want to control your downloads from anywhere? **One-click remote access:**
 
 ### Web Interface (Optional)
 - **Vercel** for free frontend hosting
+- **Supabase** for web database (PostgreSQL)
 - **Dynamic DNS** (auto-configured) for home network access
 - **Same React frontend** deployed as web app
 - **Connects to desktop app API** running on your Mac
@@ -102,7 +104,7 @@ Want to control your downloads from anywhere? **One-click remote access:**
 │                    NiluFlix.app                             │
 │  ┌─────────────────┐    ┌─────────────────┐    ┌──────────┐ │
 │  │   Electron UI   │◄──►│  Express API    │◄──►│ SQLite   │ │
-│  │   (React App)   │    │ (Auto-starts)   │    │    DB    │ │
+│  │   (React App)   │    │ (Auto-starts)   │    │ (Local)  │ │
 │  └─────────────────┘    └─────────────────┘    └──────────┘ │
 │           │                       │                    │    │
 │           │                       │                    │    │
@@ -123,7 +125,7 @@ Want to control your downloads from anywhere? **One-click remote access:**
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Vercel        │    │   Your Mac      │    │  Local Files    │
 │   (Web UI)      │◄──►│  NiluFlix.app   │◄──►│  & Torrents     │
-│                 │    │   API Server    │    │                 │
+│   + Supabase    │    │   API Server    │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
         │                       │                       │
         ▼                       ▼                       ▼
@@ -135,6 +137,7 @@ Want to control your downloads from anywhere? **One-click remote access:**
 
 ## 📊 Database Schema
 
+### Desktop App (SQLite)
 ```sql
 -- Movies table
 CREATE TABLE movies (
@@ -209,6 +212,30 @@ CREATE TABLE download_queue (
 );
 ```
 
+### Web Interface (Supabase PostgreSQL)
+```sql
+-- Remote control and sync data
+CREATE TABLE remote_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  desktop_app_id TEXT UNIQUE NOT NULL,
+  last_sync TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  is_online BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Shared library metadata (no actual files)
+CREATE TABLE shared_library (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tmdb_id INTEGER NOT NULL,
+  content_type TEXT NOT NULL, -- 'movie' or 'tv_show'
+  title TEXT NOT NULL,
+  poster_path TEXT,
+  download_status TEXT DEFAULT 'not_downloaded',
+  shared_by TEXT, -- desktop app identifier
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
 ## 📁 Local File Structure
 
 ```
@@ -238,7 +265,7 @@ CREATE TABLE download_queue (
 
 ### Option 1: **End Users (Recommended)** - Zero Configuration
 
-**For Grandma and Everyone Else:**
+**For Boomers and Everyone Else:**
 
 1. **Download**: [NiluFlix.dmg](https://github.com/yourusername/niluflix/releases/latest) 
 2. **Install**: Double-click `.dmg` → drag to Applications folder
