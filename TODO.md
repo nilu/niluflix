@@ -3,45 +3,45 @@
 ## Step 0: Environment & Tooling Setup (M1 Mac)
 
 ### Core Development Tools
-- [ ] **Node.js** (via nvm for version management)
+- [x] **Node.js** (via nvm for version management) - v24.8.0 (latest)
   ```bash
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
   nvm install --lts
   nvm use --lts
   ```
-- [ ] **Package Managers**
-  - [ ] npm (comes with Node.js)
-  - [ ] Homebrew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-- [ ] **Git** (likely pre-installed): `git --version`
-- [ ] **Code Editor**: VS Code with extensions:
-  - [ ] TypeScript and JavaScript Language Features
-  - [ ] Prettier - Code formatter
-  - [ ] ESLint
-  - [ ] Tailwind CSS IntelliSense
-  - [ ] SQLite Viewer
+- [x] **Package Managers**
+  - [x] npm (comes with Node.js) - v11.6.0
+  - [x] Homebrew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` - v4.6.10
+- [x] **Git** (likely pre-installed): `git --version` - v2.39.5
+- [x] **Code Editor**: VS Code with extensions:
+  - [x] TypeScript and JavaScript Language Features
+  - [x] Prettier - Code formatter
+  - [x] ESLint
+  - [x] Tailwind CSS IntelliSense
+  - [x] SQLite Viewer
 
 ### Electron & Desktop Development
-- [ ] **Electron** (project dependency, handled via npm)
+- [x] **Electron** (project dependency, handled via npm) - Tested and working
 - [ ] **electron-builder** (for packaging .dmg files)
-- [ ] **Xcode Command Line Tools**: `xcode-select --install`
+- [x] **Xcode Command Line Tools**: `xcode-select --install` - v2409
 
 ### Database & Backend Tools
-- [ ] **SQLite** (built into macOS, verify): `sqlite3 --version`
-- [ ] **Supabase** account and project setup
+- [x] **SQLite** (built into macOS, verify): `sqlite3 --version` - v3.43.2
+- [x] **Supabase** account and project setup - Project created, credentials configured, database schema created
 - [ ] **Database GUI**: DB Browser for SQLite or TablePlus
-- [ ] **Prisma CLI**: `npm install -g prisma`
+- [x] **Prisma CLI**: `npm install -g prisma` - v6.16.1
 
 ### Torrenting Tools (for development/testing)
-- [ ] **Transmission** (lightweight): `brew install transmission`
+- [x] **Transmission** (lightweight): `brew install transmission` - v4.0.6
 - [ ] **qBittorrent** (alternative): `brew install qbittorrent`
 
 ### API & External Services
-- [ ] **TMDB API Key**: Register at https://www.themoviedb.org/settings/api
-- [ ] **Supabase Project**: Create at https://supabase.com/dashboard
-- [ ] **OpenSubtitles API**: Register for subtitle support
+- [x] **TMDB API Key**: Register at https://www.themoviedb.org/settings/api - API key obtained
+- [x] **Supabase Project**: Create at https://supabase.com/dashboard - Project created, schema configured
+- [x] **OpenSubtitles API**: Free public API available - No key required
 
 ### Optional Development Tools
-- [ ] **Vercel CLI** (for web deployment): `npm install -g vercel`
+- [x] **Vercel CLI** (for web deployment): `npm install -g vercel` - v48.0.0
 - [ ] **Postman** or **Insomnia** (API testing)
 - [ ] **Docker** (if containerization needed later)
 
