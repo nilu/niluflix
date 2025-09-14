@@ -1,10 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useSearchMovies } from '../hooks/useMovies';
+import { useSearchTVShows } from '../hooks/useTVShows';
+import ContentCard from '../components/content/ContentCard';
+import Spinner from '../components/ui/Spinner';
 
 const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [type, setType] = useState(searchParams.get('type') || 'movie');
+
+  // Search hooks
+  const searchMovies = useSearchMovies(
+    { query, page: 1 }, 
+    query.length > 0 && (type === 'movie' || type === 'mixed')
+  );
+  
+  const searchTVShows = useSearchTVShows(
+    { query, page: 1 }, 
+    query.length > 0 && (type === 'tv' || type === 'mixed')
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,6 +31,46 @@ const SearchPage: React.FC = () => {
       window.location.hash = `#/search?${newSearchParams.toString()}`;
     }
   };
+
+  // Get search results based on type
+  const getSearchResults = () => {
+    if (type === 'movie') {
+      return searchMovies.data?.results || [];
+    } else if (type === 'tv') {
+      return searchTVShows.data?.results || [];
+    } else if (type === 'mixed') {
+      const movies = searchMovies.data?.results || [];
+      const tvShows = searchTVShows.data?.results || [];
+      return [...movies, ...tvShows].slice(0, 20); // Limit to 20 results
+    }
+    return [];
+  };
+
+  const isLoading = () => {
+    if (type === 'movie') {
+      return searchMovies.isLoading;
+    } else if (type === 'tv') {
+      return searchTVShows.isLoading;
+    } else if (type === 'mixed') {
+      return searchMovies.isLoading || searchTVShows.isLoading;
+    }
+    return false;
+  };
+
+  const hasError = () => {
+    if (type === 'movie') {
+      return searchMovies.error;
+    } else if (type === 'tv') {
+      return searchTVShows.error;
+    } else if (type === 'mixed') {
+      return searchMovies.error || searchTVShows.error;
+    }
+    return null;
+  };
+
+  const results = getSearchResults();
+  const loading = isLoading();
+  const error = hasError();
 
   return (
     <div className="space-y-8">
@@ -82,23 +137,53 @@ const SearchPage: React.FC = () => {
 
       {/* Search Results */}
       {query && (
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-white mb-6">
             Search Results for "{query}"
           </h2>
           
-          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-2">🔍 Search Working!</h3>
-            <p className="text-gray-300 mb-2">
-              You searched for: <span className="font-semibold text-white">"{query}"</span>
-            </p>
-            <p className="text-gray-300 mb-2">
-              Type: <span className="font-semibold text-white">{type}</span>
-            </p>
-            <p className="text-gray-300">
-              Next step: Connect to TMDB API to show actual search results
-            </p>
-          </div>
+          {loading && (
+            <div className="flex justify-center items-center py-12">
+              <Spinner size="lg" />
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 text-center">
+              <h3 className="text-lg font-semibold text-red-400 mb-2">❌ Search Error</h3>
+              <p className="text-gray-300">
+                Failed to search. Please try again.
+              </p>
+            </div>
+          )}
+
+          {!loading && !error && results.length === 0 && (
+            <div className="bg-gray-500/10 border border-gray-500/30 rounded-lg p-6 text-center">
+              <h3 className="text-lg font-semibold text-gray-400 mb-2">No Results Found</h3>
+              <p className="text-gray-300">
+                No {type === 'mixed' ? 'content' : type === 'movie' ? 'movies' : 'TV shows'} found for "{query}"
+              </p>
+            </div>
+          )}
+
+          {!loading && !error && results.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {results.map((item) => (
+                <ContentCard
+                  key={item.id}
+                  content={{
+                    id: item.id,
+                    title: item.title || item.name,
+                    poster_path: item.poster_path,
+                    vote_average: item.vote_average,
+                    release_date: item.release_date || item.first_air_date,
+                    type: item.name ? 'tv' : 'movie',
+                    download_status: item.download_status || 'not_downloaded',
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
