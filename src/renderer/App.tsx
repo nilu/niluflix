@@ -4,11 +4,8 @@ import MainLayout from './components/MainLayout';
 import HeroSection from './components/HeroSection';
 import ContentRow from './components/ContentRow';
 
-console.log('App.tsx loaded!');
-
 // Enhanced HomePage with Netflix-style layout
 const HomePage = () => {
-  console.log('HomePage component is rendering!');
   // Sample data for content rows
   const trendingMovies = [
     { id: '1', title: 'The Dark Knight', year: '2008', genre: 'Action', rating: '9.0' },
@@ -206,18 +203,13 @@ const SettingsPage = () => (
 );
 
 const App: React.FC = () => {
-  console.log('App component rendering...');
-  
   React.useEffect(() => {
-    console.log('App component mounted!');
+    // App initialized
   }, []);
 
   return (
     <Router>
       <MainLayout>
-        <div className="p-4 bg-red-500 text-white mb-4">
-          ROUTER DEBUG: Current URL should show content below this red box
-        </div>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/movies" element={<MoviesPage />} />

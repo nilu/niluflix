@@ -96,26 +96,27 @@
   - [x] Magnet link generation
 
 ### Step 5: Torrenting Engine
-- [ ] **5.1** Torrent client integration
-  - [ ] Auto-detect Transmission/qBittorrent installation
-  - [ ] Client communication (API/RPC)
-  - [ ] Download queue management
-- [ ] **5.2** File management
-  - [ ] Auto-create download directories (`~/Movies/NiluFlix/`)
-  - [ ] File organization (Movies/, TV Shows/, proper folder structure)
-  - [ ] Metadata file generation
-  - [ ] Progress tracking and status updates
+- [x] **5.1** Torrent client integration
+  - [x] Auto-detect Transmission/qBittorrent installation
+  - [x] Client communication (API/RPC)
+  - [x] Download queue management
+- [x] **5.2** File management
+  - [x] Auto-create download directories (`~/Movies/NiluFlix/`)
+  - [x] File organization (Movies/, TV Shows/, proper folder structure)
+  - [x] Metadata file generation
+  - [x] Progress tracking and status updates
 
 ### Step 6: Frontend Foundation (React)
-- [ ] **6.1** React app setup
-  - [ ] Create React app with TypeScript
-  - [ ] Tailwind CSS configuration
-  - [ ] React Query for data fetching
-  - [ ] Framer Motion for animations
-- [ ] **6.2** Component architecture
-  - [ ] Base UI components (Button, Card, Modal, etc.)
-  - [ ] Layout components (Header, Sidebar, Grid)
-  - [ ] Route setup with React Router
+- [x] **6.1** React app setup
+  - [x] Create React app with TypeScript
+  - [x] Tailwind CSS v4.1 configuration with PostCSS
+  - [x] React Router with HashRouter for Electron
+  - [x] Component architecture foundation
+- [x] **6.2** Component architecture
+  - [x] Layout components (Header, Sidebar, MainLayout)
+  - [x] Netflix-style homepage with content rows
+  - [x] Movie/TV show cards with hover effects
+  - [x] Professional routing and navigation
 
 ### Step 7: Netflix-Style UI Components
 - [ ] **7.1** Home page layout
