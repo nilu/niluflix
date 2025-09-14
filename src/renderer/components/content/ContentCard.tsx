@@ -1,24 +1,39 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { PlayIcon, PlusIcon, ArrowDownTrayIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { PlayIcon, PlusIcon } from '@heroicons/react/24/outline';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import DownloadButton from '../downloads/DownloadButton';
 
 interface ContentCardProps {
   content: {
     id: number;
     title: string;
     poster_path: string;
+    poster_url?: string;
     vote_average: number;
     release_date?: string;
     first_air_date?: string;
     type: 'movie' | 'tv';
-    download_status: 'not_downloaded' | 'downloading' | 'downloaded' | 'failed';
+    download_status?: 'not_downloaded' | 'downloading' | 'downloaded' | 'failed';
+    download_progress?: number;
   };
+  onDownload?: (contentId: number, options?: any) => void;
+  onPause?: (contentId: number) => void;
+  onResume?: (contentId: number) => void;
+  onCancel?: (contentId: number) => void;
+  onRetry?: (contentId: number) => void;
 }
 
-const ContentCard: React.FC<ContentCardProps> = ({ content }) => {
+const ContentCard: React.FC<ContentCardProps> = ({ 
+  content, 
+  onDownload, 
+  onPause, 
+  onResume, 
+  onCancel, 
+  onRetry 
+}) => {
   const [isHovered, setIsHovered] = React.useState(false);
   
   const releaseYear = content.release_date 
@@ -27,31 +42,6 @@ const ContentCard: React.FC<ContentCardProps> = ({ content }) => {
     ? new Date(content.first_air_date).getFullYear()
     : '';
 
-  const getDownloadIcon = () => {
-    switch (content.download_status) {
-      case 'downloading':
-        return <ArrowDownTrayIcon className="w-4 h-4 text-blue-400" />;
-      case 'downloaded':
-        return <CheckCircleIcon className="w-4 h-4 text-green-400" />;
-      case 'failed':
-        return <ArrowDownTrayIcon className="w-4 h-4 text-red-400" />;
-      default:
-        return <ArrowDownTrayIcon className="w-4 h-4 text-gray-400" />;
-    }
-  };
-
-  const getDownloadStatus = () => {
-    switch (content.download_status) {
-      case 'downloading':
-        return 'Downloading...';
-      case 'downloaded':
-        return 'Downloaded';
-      case 'failed':
-        return 'Failed';
-      default:
-        return 'Download';
-    }
-  };
 
   return (
     <motion.div
@@ -96,14 +86,15 @@ const ContentCard: React.FC<ContentCardProps> = ({ content }) => {
           </motion.div>
           
           {/* Download Status */}
-          <div className="absolute top-2 right-2">
-            <div className="flex items-center space-x-1 bg-black/70 rounded px-2 py-1">
-              {getDownloadIcon()}
-              <span className="text-xs text-white">
-                {getDownloadStatus()}
-              </span>
+          {content.download_status && content.download_status !== 'not_downloaded' && (
+            <div className="absolute top-2 right-2">
+              <div className="flex items-center space-x-1 bg-black/70 rounded px-2 py-1">
+                <span className="text-xs text-white">
+                  {content.download_status.charAt(0).toUpperCase() + content.download_status.slice(1)}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
         
         {/* Content Info */}
@@ -127,14 +118,22 @@ const ContentCard: React.FC<ContentCardProps> = ({ content }) => {
           
           {/* Download Button */}
           <div className="mt-2">
-            <Button
-              variant="ghost"
+            <DownloadButton
+              contentId={content.id}
+              contentType={content.type === 'tv' ? 'tv_show' : 'movie'}
+              title={content.title}
+              downloadStatus={content.download_status}
+              progress={content.download_progress}
+              onDownload={onDownload}
+              onPause={onPause}
+              onResume={onResume}
+              onCancel={onCancel}
+              onRetry={onRetry}
               size="sm"
-              className="w-full text-xs"
-              disabled={content.download_status === 'downloading'}
-            >
-              {getDownloadStatus()}
-            </Button>
+              variant="ghost"
+              className="w-full"
+              showProgress={false}
+            />
           </div>
         </div>
       </Card>

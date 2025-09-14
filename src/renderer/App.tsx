@@ -2,6 +2,7 @@ import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AppLayout from './components/layout/AppLayout';
+import NotificationManager from './components/downloads/NotificationManager';
 import HomePage from './pages/HomePage';
 import MovieDetailPage from './pages/MovieDetailPage';
 import TVShowDetailPage from './pages/TVShowDetailPage';
@@ -31,24 +32,26 @@ const App: React.FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <AppLayout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/movie/:id" element={<MovieDetailPage />} />
-            <Route path="/tv/:id" element={<TVShowDetailPage />} />
-            <Route path="/library" element={<LibraryPage />} />
-            <Route path="/downloads" element={<DownloadsPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="*" element={
-              <div className="p-6 bg-yellow-500 text-black">
-                <h1 className="text-2xl font-bold">404 - Route Not Found</h1>
-                <p>Current path doesn't match any route</p>
-              </div>
-            } />
-          </Routes>
-        </AppLayout>
-      </Router>
+      <NotificationManager>
+        <Router>
+          <AppLayout>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/movie/:id" element={<MovieDetailPage />} />
+              <Route path="/tv/:id" element={<TVShowDetailPage />} />
+              <Route path="/library" element={<LibraryPage />} />
+              <Route path="/downloads" element={<DownloadsPage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="*" element={
+                <div className="p-6 bg-yellow-500 text-black">
+                  <h1 className="text-2xl font-bold">404 - Route Not Found</h1>
+                  <p>Current path doesn't match any route</p>
+                </div>
+              } />
+            </Routes>
+          </AppLayout>
+        </Router>
+      </NotificationManager>
     </QueryClientProvider>
   );
 };

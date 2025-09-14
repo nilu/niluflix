@@ -25,13 +25,17 @@ class TorrentSearchEngine {
             // Enable all available providers
             const availableProviders = torrent_search_api_1.default.getProviders();
             console.log('Available torrent providers:', availableProviders.map(p => p.name));
-            // Prioritize reliable providers
+            // Prioritize reliable providers (excluding those requiring login)
             const preferredProviders = [
                 '1337x',
                 'ThePirateBay',
                 'Torrentz2',
-                'Nyaa',
-                'YTS'
+                'YTS',
+                'KickassTorrents',
+                'Limetorrents',
+                'Rarbg',
+                'Torrent9',
+                'TorrentProject'
             ];
             for (const providerName of preferredProviders) {
                 const provider = availableProviders.find(p => p.name === providerName);
@@ -46,9 +50,11 @@ class TorrentSearchEngine {
                     }
                 }
             }
-            // Enable remaining providers as fallbacks
+            // Enable remaining providers as fallbacks (excluding those requiring login)
+            const excludedProviders = ['IpTorrents', 'TorrentLeech', 'Yggtorrent', 'Nyaa'];
+            
             for (const provider of availableProviders) {
-                if (!this.providers.includes(provider.name)) {
+                if (!this.providers.includes(provider.name) && !excludedProviders.includes(provider.name)) {
                     try {
                         torrent_search_api_1.default.enableProvider(provider.name);
                         this.providers.push(provider.name);
@@ -158,18 +164,16 @@ class TorrentSearchEngine {
             for (const searchTerm of searchTerms.slice(0, 3)) { // Limit to first 3 terms
                 try {
                     console.log(`🔎 Searching for: "${searchTerm}"`);
-                    // Set category
+                    // Map category to the correct format
+                    let searchCategory = 'All';
                     if (category === 'movies') {
-                        torrent_search_api_1.default.setCategory('Movies');
+                        searchCategory = 'Movies';
                     }
                     else if (category === 'tv') {
-                        torrent_search_api_1.default.setCategory('TV');
-                    }
-                    else {
-                        torrent_search_api_1.default.setCategory('All');
+                        searchCategory = 'TV';
                     }
                     const results = await Promise.race([
-                        torrent_search_api_1.default.search(searchTerm, category === 'all' ? 'All' : category, maxResults),
+                        torrent_search_api_1.default.search(providers, searchTerm, searchCategory, maxResults),
                         new Promise((_, reject) => setTimeout(() => reject(new Error('Search timeout')), timeout))
                     ]);
                     if (Array.isArray(results)) {
@@ -182,28 +186,52 @@ class TorrentSearchEngine {
             }
             console.log(`📝 Found ${allResults.length} raw results`);
             // Process and rank results
-            const processedResults = allResults
-                .map((result) => ({
-                title: result.title || '',
-                magnet: result.magnet || '',
-                size: result.size || '',
-                seeders: parseInt(result.seeds) || parseInt(result.seeders) || 0,
-                leechers: parseInt(result.peers) || parseInt(result.leechers) || 0,
-                time: result.time || result.upload || '',
-                provider: result.provider || 'unknown',
-                quality: this.extractQuality(result.title || ''),
-                score: 0, // Will be calculated next
-                verified: result.verified === true
-            }))
-                .filter(result => result.magnet &&
-                result.title &&
-                result.seeders >= minSeeders)
-                .map(result => ({
-                ...result,
-                score: this.calculateScore(result, preferredQuality)
-            }))
-                .sort((a, b) => b.score - a.score) // Sort by score descending
-                .slice(0, maxResults);
+            const processedResults = [];
+            for (const result of allResults) {
+                try {
+                    // Skip if basic requirements not met
+                    if (!result.title || (parseInt(result.seeds) || parseInt(result.seeders) || 0) < minSeeders) {
+                        continue;
+                    }
+                    // Get magnet link
+                    let magnet = '';
+                    try {
+                        magnet = await torrent_search_api_1.default.getMagnet(result);
+                    }
+                    catch (error) {
+                        console.warn(`Failed to get magnet for "${result.title}":`, error.message);
+                        continue; // Skip this result if we can't get magnet
+                    }
+                    if (!magnet) {
+                        continue; // Skip if no magnet link
+                    }
+                    const processedResult = {
+                        title: result.title || '',
+                        magnet: magnet,
+                        size: result.size || '',
+                        seeders: parseInt(result.seeds) || parseInt(result.seeders) || 0,
+                        leechers: parseInt(result.peers) || parseInt(result.leechers) || 0,
+                        time: result.time || result.upload || '',
+                        provider: result.provider || 'unknown',
+                        quality: this.extractQuality(result.title || ''),
+                        score: 0, // Will be calculated next
+                        verified: result.verified === true
+                    };
+                    // Calculate score
+                    processedResult.score = this.calculateScore(processedResult, preferredQuality);
+                    processedResults.push(processedResult);
+                    // Stop if we have enough results
+                    if (processedResults.length >= maxResults) {
+                        break;
+                    }
+                }
+                catch (error) {
+                    console.warn(`Error processing result "${result.title}":`, error.message);
+                    continue;
+                }
+            }
+            // Sort by score descending
+            processedResults.sort((a, b) => b.score - a.score);
             console.log(`✅ Returning ${processedResults.length} filtered and ranked results`);
             // Log top 3 results for debugging
             processedResults.slice(0, 3).forEach((result, index) => {

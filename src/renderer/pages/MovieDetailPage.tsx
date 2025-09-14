@@ -1,9 +1,10 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { PlayIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { PlayIcon, PlusIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
+import DownloadButton from '../components/downloads/DownloadButton';
 import { useMovieDetails, useDownloadMovie } from '../hooks/useMovies';
 
 const MovieDetailPage: React.FC = () => {
@@ -85,12 +86,16 @@ const MovieDetailPage: React.FC = () => {
           <span>Add to Library</span>
         </Button>
         
-        <Button variant="outline" size="lg" className="flex items-center space-x-2">
-          <ArrowDownTrayIcon className="w-5 h-5" />
-          <span>
-            {movie.download_status === 'downloaded' ? 'Downloaded' : 'Download'}
-          </span>
-        </Button>
+        <DownloadButton
+          contentId={movie.id}
+          contentType="movie"
+          title={movie.title}
+          downloadStatus={movie.download_status}
+          progress={movie.download_progress}
+          onDownload={handleDownload}
+          size="lg"
+          variant="outline"
+        />
       </div>
 
       {/* Download Status */}

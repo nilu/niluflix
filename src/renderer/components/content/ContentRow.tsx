@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import ContentCard from './ContentCard';
-import { usePopularMovies, useTrendingMovies, useDownloadedMovies, useSearchMovies, useMoviesByGenre } from '../../hooks/useMovies';
-import { usePopularTVShows, useTrendingTVShows, useDownloadedTVShows, useSearchTVShows, useTVShowsByGenre } from '../../hooks/useTVShows';
+import { usePopularMovies, useTrendingMovies, useDownloadedMovies, useSearchMovies, useMoviesByGenre, useDownloadMovie } from '../../hooks/useMovies';
+import { usePopularTVShows, useTrendingTVShows, useDownloadedTVShows, useSearchTVShows, useTVShowsByGenre, useDownloadTVShow } from '../../hooks/useTVShows';
 import Spinner from '../ui/Spinner';
 
 interface ContentRowProps {
@@ -20,6 +20,39 @@ const ContentRow: React.FC<ContentRowProps> = ({
   query,
   genreId,
 }) => {
+  // Download mutations
+  const downloadMovie = useDownloadMovie();
+  const downloadTVShow = useDownloadTVShow();
+
+  // Download handlers
+  const handleDownload = (contentId: number, contentType: string, options?: any) => {
+    if (contentType === 'movie') {
+      downloadMovie.mutate({ id: contentId, quality: options?.quality });
+    } else if (contentType === 'tv_show') {
+      downloadTVShow.mutate({ id: contentId, seasons: options?.seasons, quality: options?.quality });
+    }
+  };
+
+  const handlePause = (contentId: number) => {
+    // TODO: Implement pause functionality
+    console.log('Pause download:', contentId);
+  };
+
+  const handleResume = (contentId: number) => {
+    // TODO: Implement resume functionality
+    console.log('Resume download:', contentId);
+  };
+
+  const handleCancel = (contentId: number) => {
+    // TODO: Implement cancel functionality
+    console.log('Cancel download:', contentId);
+  };
+
+  const handleRetry = (contentId: number) => {
+    // TODO: Implement retry functionality
+    console.log('Retry download:', contentId);
+  };
+
   // Conditionally fetch data based on what's actually needed
   const shouldFetchPopularMovies = category === 'popular' && type === 'movie';
   const shouldFetchTrendingMovies = category === 'trending' && type === 'movie';
@@ -192,15 +225,23 @@ const ContentRow: React.FC<ContentRowProps> = ({
               transition={{ delay: index * 0.1 }}
               className="flex-shrink-0"
             >
-              <ContentCard content={{
-                id: item.id,
-                title: item.title || item.name,
-                poster_path: item.poster_path,
-                vote_average: item.vote_average,
-                release_date: item.release_date || item.first_air_date,
-                type: item.type || (item.name ? 'tv' : 'movie'),
-                download_status: item.download_status || 'not_downloaded',
-              }} />
+              <ContentCard 
+                content={{
+                  id: item.id,
+                  title: item.title || item.name,
+                  poster_path: item.poster_path,
+                  vote_average: item.vote_average,
+                  release_date: item.release_date || item.first_air_date,
+                  type: item.type || (item.name ? 'tv' : 'movie'),
+                  download_status: item.download_status || 'not_downloaded',
+                  download_progress: item.download_progress,
+                }}
+                onDownload={(contentId, options) => handleDownload(contentId, item.type || (item.name ? 'tv_show' : 'movie'), options)}
+                onPause={handlePause}
+                onResume={handleResume}
+                onCancel={handleCancel}
+                onRetry={handleRetry}
+              />
             </motion.div>
           ))}
         </div>
