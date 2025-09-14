@@ -1,27 +1,91 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import MainLayout from './components/MainLayout';
 
 console.log('App.tsx loaded!');
 
-// Simple test pages for navigation
+// Enhanced pages with better content
 const HomePage = () => (
-  <div className="p-5">
-    <h2 className="text-2xl font-bold mb-4">🏠 Home Page</h2>
-    <p>Welcome to NiluFlix! Browse your favorite movies and TV shows.</p>
+  <div>
+    <h1 className="text-4xl font-bold mb-6">Welcome to NiluFlix</h1>
+    <p className="text-xl text-gray-300 mb-8">
+      Your personal streaming platform with unlimited content
+    </p>
+    
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="bg-gray-800 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold mb-2">🎬 Movies</h3>
+        <p className="text-gray-300">Discover and download your favorite films</p>
+      </div>
+      <div className="bg-gray-800 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold mb-2">📺 TV Shows</h3>
+        <p className="text-gray-300">Binge-watch entire series at your pace</p>
+      </div>
+      <div className="bg-gray-800 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold mb-2">📚 My Library</h3>
+        <p className="text-gray-300">Manage your personal media collection</p>
+      </div>
+    </div>
   </div>
 );
 
 const MoviesPage = () => (
-  <div className="p-5">
-    <h2 className="text-2xl font-bold mb-4">🎬 Movies</h2>
-    <p>Discover amazing movies here.</p>
+  <div>
+    <h1 className="text-4xl font-bold mb-6">🎬 Movies</h1>
+    <p className="text-xl text-gray-300 mb-8">
+      Discover amazing movies and build your collection
+    </p>
+    <div className="bg-gray-800 p-8 rounded-lg text-center">
+      <p className="text-gray-400">Movie search and discovery coming soon...</p>
+    </div>
   </div>
 );
 
 const TVShowsPage = () => (
-  <div className="p-5">
-    <h2 className="text-2xl font-bold mb-4">📺 TV Shows</h2>
-    <p>Browse your favorite TV series.</p>
+  <div>
+    <h1 className="text-4xl font-bold mb-6">📺 TV Shows</h1>
+    <p className="text-xl text-gray-300 mb-8">
+      Browse your favorite TV series and seasons
+    </p>
+    <div className="bg-gray-800 p-8 rounded-lg text-center">
+      <p className="text-gray-400">TV show browser coming soon...</p>
+    </div>
+  </div>
+);
+
+const LibraryPage = () => (
+  <div>
+    <h1 className="text-4xl font-bold mb-6">📚 My Library</h1>
+    <p className="text-xl text-gray-300 mb-8">
+      Manage your personal media collection
+    </p>
+    <div className="bg-gray-800 p-8 rounded-lg text-center">
+      <p className="text-gray-400">Library management coming soon...</p>
+    </div>
+  </div>
+);
+
+const DownloadsPage = () => (
+  <div>
+    <h1 className="text-4xl font-bold mb-6">⬇️ Downloads</h1>
+    <p className="text-xl text-gray-300 mb-8">
+      Monitor your download progress and queue
+    </p>
+    <div className="bg-gray-800 p-8 rounded-lg text-center">
+      <p className="text-gray-400">Download manager coming soon...</p>
+    </div>
+  </div>
+);
+
+const SettingsPage = () => (
+  <div>
+    <h1 className="text-4xl font-bold mb-6">⚙️ Settings</h1>
+    <p className="text-xl text-gray-300 mb-8">
+      Configure your NiluFlix experience
+    </p>
+    <div className="bg-gray-800 p-8 rounded-lg text-center">
+      <p className="text-gray-400">Settings panel coming soon...</p>
+    </div>
   </div>
 );
 
@@ -34,36 +98,16 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="bg-black text-white min-h-screen">
-        {/* Header with Navigation */}
-        <header className="bg-gray-900 border-b border-gray-700 p-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-red-600 text-3xl font-bold">NILUFLIX</h1>
-            
-            <nav className="flex space-x-6">
-              <Link to="/" className="text-white hover:text-red-500 transition-colors">Home</Link>
-              <Link to="/movies" className="text-white hover:text-red-500 transition-colors">Movies</Link>
-              <Link to="/tv" className="text-white hover:text-red-500 transition-colors">TV Shows</Link>
-            </nav>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <main>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/movies" element={<MoviesPage />} />
-            <Route path="/tv" element={<TVShowsPage />} />
-          </Routes>
-        </main>
-
-        {/* Status Check */}
-        <div className="fixed bottom-4 right-4 bg-gray-800 border border-gray-600 p-3 rounded-lg text-sm">
-          <h3 className="text-green-400 font-semibold mb-1">✅ Status</h3>
-          <p>✅ React Router working</p>
-          <p>✅ Tailwind v4.1 PostCSS</p>
-        </div>
-      </div>
+      <MainLayout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/movies" element={<MoviesPage />} />
+          <Route path="/tv" element={<TVShowsPage />} />
+          <Route path="/library" element={<LibraryPage />} />
+          <Route path="/downloads" element={<DownloadsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+      </MainLayout>
     </Router>
   );
 };
