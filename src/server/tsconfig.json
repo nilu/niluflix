@@ -7,7 +7,11 @@
     "rootDir": ".",
     "noEmit": false,
     "jsx": "preserve",
-    "types": ["node"]
+    "types": ["node"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "strict": false
   },
   "include": [
     "./**/*"

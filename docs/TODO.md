@@ -71,17 +71,17 @@
   - [x] Setup seed data for development
   - [x] Database connection and error handling
 
-### Step 3: Backend API Foundation
-- [ ] **3.1** Express server setup
-  - [ ] Basic Express app with TypeScript
-  - [ ] CORS configuration for Electron integration
-  - [ ] Error handling middleware
-  - [ ] Request logging and validation
-- [ ] **3.2** Core API routes structure
-  - [ ] Movies endpoints (`/api/movies/*`)
-  - [ ] TV Shows endpoints (`/api/tv/*`)
-  - [ ] Downloads endpoints (`/api/downloads/*`)
-  - [ ] Health check endpoint
+### Step 3: Backend API Foundation ✅ COMPLETED
+- [x] **3.1** Express server setup
+  - [x] Basic Express app with TypeScript
+  - [x] CORS configuration for Electron integration
+  - [x] Error handling middleware
+  - [x] Request logging and validation
+- [x] **3.2** Core API routes structure
+  - [x] Movies endpoints (`/api/movies/*`)
+  - [x] TV Shows endpoints (`/api/tv/*`)
+  - [x] Downloads endpoints (`/api/downloads/*`)
+  - [x] Health check endpoint
 
 ### Step 4: External API Integration
 - [ ] **4.1** TMDB API integration
