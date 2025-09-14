@@ -1,47 +1,35 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import ContentRow from '../components/content/ContentRow';
-import HeroSection from '../components/content/HeroSection';
 
 const HomePage: React.FC = () => {
   return (
     <div className="py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="space-y-8">
-          {/* Hero Section */}
-          <HeroSection />
+          <h1 className="text-4xl font-bold text-white mb-8">
+            Welcome to NiluFlix
+          </h1>
           
-          {/* Content Rows */}
-          <div className="space-y-12">
-            <ContentRow
-              title="Trending Movies"
-              type="movie"
-              category="trending"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+              <h2 className="text-xl font-semibold text-white mb-4">🎬 Movies</h2>
+              <p className="text-gray-400">Browse and download the latest movies</p>
+            </div>
             
-            <ContentRow
-              title="Popular Movies"
-              type="movie"
-              category="popular"
-            />
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+              <h2 className="text-xl font-semibold text-white mb-4">📺 TV Shows</h2>
+              <p className="text-gray-400">Watch your favorite TV series</p>
+            </div>
             
-            <ContentRow
-              title="Trending TV Shows"
-              type="tv"
-              category="trending"
-            />
-            
-            <ContentRow
-              title="Popular TV Shows"
-              type="tv"
-              category="popular"
-            />
-            
-            {/* <ContentRow
-              title="Recently Downloaded"
-              type="mixed"
-              category="downloaded"
-            /> */}
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+              <h2 className="text-xl font-semibold text-white mb-4">📚 Library</h2>
+              <p className="text-gray-400">Access your downloaded content</p>
+            </div>
+          </div>
+          
+          <div className="mt-8 p-6 bg-green-500/10 border border-green-500/30 rounded-lg">
+            <h3 className="text-lg font-semibold text-green-400 mb-2">✅ React App Working!</h3>
+            <p className="text-gray-300">The React app is now successfully running inside Electron.</p>
+            <p className="text-gray-300 mt-2">Click the search icon in the header to test the click functionality.</p>
           </div>
         </div>
       </div>

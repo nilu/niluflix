@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import ContentRow from '../components/content/ContentRow';
 
 const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -39,7 +36,9 @@ const SearchPage: React.FC = () => {
               placeholder="Search for movies, TV shows..."
               className="w-full px-6 py-4 pl-14 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
             />
-            <MagnifyingGlassIcon className="absolute left-5 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
+            <svg className="absolute left-5 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
           
           {/* Type Toggle */}
@@ -83,13 +82,23 @@ const SearchPage: React.FC = () => {
 
       {/* Search Results */}
       {query && (
-        <div>
-          <ContentRow
-            title={`Search Results for "${query}"`}
-            type={type as 'movie' | 'tv' | 'mixed'}
-            category="search"
-            query={query}
-          />
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-white mb-6">
+            Search Results for "{query}"
+          </h2>
+          
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-green-400 mb-2">🔍 Search Working!</h3>
+            <p className="text-gray-300 mb-2">
+              You searched for: <span className="font-semibold text-white">"{query}"</span>
+            </p>
+            <p className="text-gray-300 mb-2">
+              Type: <span className="font-semibold text-white">{type}</span>
+            </p>
+            <p className="text-gray-300">
+              Next step: Connect to TMDB API to show actual search results
+            </p>
+          </div>
         </div>
       )}
     </div>
