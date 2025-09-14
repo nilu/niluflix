@@ -10,7 +10,7 @@
     "electron:dev": "electron . --dev",
     "server:dev": "nodemon src/server/index.ts --watch src/server --exec \"ts-node\"",
     "build": "npm run build:renderer && npm run build:server",
-    "build:renderer": "npm run build:css && webpack --mode production",
+    "build:renderer": "npm run build:css && webpack --config config/webpack.config.js --mode production",
     "build:server": "tsc --project src/server/tsconfig.json",
     "build:css": "npx @tailwindcss/cli@latest -i ./src/renderer/input.css -o ./src/renderer/output.css",
     "build:css:watch": "npx @tailwindcss/cli@latest -i ./src/renderer/input.css -o ./src/renderer/output.css --watch",

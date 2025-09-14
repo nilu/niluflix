@@ -1,6 +1,9 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+// Disable hardware acceleration to prevent GPU crashes
+app.disableHardwareAcceleration();
+
 function createWindow() {
   // Create the browser window
   const mainWindow = new BrowserWindow({
@@ -10,23 +13,41 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
+      webSecurity: false, // Disable web security for development
     },
     titleBarStyle: 'hiddenInset',
     show: false, // Don't show until ready-to-show
   });
 
   // Load the app
-  mainWindow.loadFile('src/renderer/index.html');
+  const isDev = process.argv.includes('--dev');
+  if (isDev) {
+    // In development, load the built React app
+    mainWindow.loadFile('dist/renderer/index.html');
+  } else {
+    // In production, load from dist
+    mainWindow.loadFile('dist/renderer/index.html');
+  }
 
   // Show when ready to prevent visual flash
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
   });
 
+  // Handle page load errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error('Failed to load:', errorCode, errorDescription, validatedURL);
+  });
+
   // Open DevTools in development
   if (process.argv.includes('--dev')) {
     mainWindow.webContents.openDevTools();
   }
+
+  // Log when page is loaded
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log('Page loaded successfully');
+  });
 }
 
 // This method will be called when Electron has finished initialization

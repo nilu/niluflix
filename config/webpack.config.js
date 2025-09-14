@@ -19,12 +19,9 @@ module.exports = (env, argv) => {
 
     resolve: {
       extensions: ['.tsx', '.ts', '.js', '.jsx'],
-      alias: {
-        '@': path.resolve(__dirname, '../src'),
-        '@main': path.resolve(__dirname, '../src/main'),
-        '@renderer': path.resolve(__dirname, '../src/renderer'),
-        '@server': path.resolve(__dirname, '../src/server'),
-        '@shared': path.resolve(__dirname, '../src/shared'),
+      fallback: {
+        "path": false,
+        "fs": false,
       },
     },
 
