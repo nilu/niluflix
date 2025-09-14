@@ -4,38 +4,20 @@ import { motion } from 'framer-motion';
 import { PlayIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
+import { useMovieDetails, useDownloadMovie } from '../hooks/useMovies';
 
 const MovieDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [movie, setMovie] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const movieId = id ? parseInt(id) : 0;
+  
+  const { data: movie, isLoading, error } = useMovieDetails(movieId);
+  const downloadMovie = useDownloadMovie();
 
-  React.useEffect(() => {
-    // TODO: Fetch movie details from API
-    const fetchMovie = async () => {
-      setIsLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setMovie({
-          id: id,
-          title: 'The Dark Knight',
-          overview: 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.',
-          poster_path: '/qJ2tW6WMUDux911r6m7haRef0WH.jpg',
-          backdrop_path: '/hqkIcbrOHL86UncnHIsHVcVmzue.jpg',
-          release_date: '2008-07-18',
-          runtime: 152,
-          vote_average: 8.5,
-          genres: ['Action', 'Crime', 'Drama'],
-          download_status: 'not_downloaded',
-        });
-        setIsLoading(false);
-      }, 1000);
-    };
-
-    if (id) {
-      fetchMovie();
+  const handleDownload = () => {
+    if (movie) {
+      downloadMovie.mutate({ id: movie.id });
     }
-  }, [id]);
+  };
 
   if (isLoading) {
     return (
@@ -45,10 +27,11 @@ const MovieDetailPage: React.FC = () => {
     );
   }
 
-  if (!movie) {
+  if (error || !movie) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-400 text-lg">Movie not found</p>
+        <p className="text-red-400 text-lg mb-2">Failed to load movie details</p>
+        <p className="text-gray-400">Please try again later</p>
       </div>
     );
   }

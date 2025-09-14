@@ -4,40 +4,20 @@ import { motion } from 'framer-motion';
 import { PlayIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
+import { useTVShowDetails, useDownloadTVShow } from '../hooks/useTVShows';
 
 const TVShowDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [show, setShow] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const tvId = id ? parseInt(id) : 0;
+  
+  const { data: show, isLoading, error } = useTVShowDetails(tvId);
+  const downloadTVShow = useDownloadTVShow();
 
-  React.useEffect(() => {
-    // TODO: Fetch TV show details from API
-    const fetchShow = async () => {
-      setIsLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setShow({
-          id: id,
-          name: 'Breaking Bad',
-          overview: 'A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family\'s future.',
-          poster_path: '/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
-          backdrop_path: '/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg',
-          first_air_date: '2008-01-20',
-          last_air_date: '2013-09-29',
-          number_of_seasons: 5,
-          number_of_episodes: 62,
-          vote_average: 8.9,
-          genres: ['Crime', 'Drama', 'Thriller'],
-          status: 'Ended',
-        });
-        setIsLoading(false);
-      }, 1000);
-    };
-
-    if (id) {
-      fetchShow();
+  const handleDownload = () => {
+    if (show) {
+      downloadTVShow.mutate({ id: show.id });
     }
-  }, [id]);
+  };
 
   if (isLoading) {
     return (
@@ -47,10 +27,11 @@ const TVShowDetailPage: React.FC = () => {
     );
   }
 
-  if (!show) {
+  if (error || !show) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-400 text-lg">TV Show not found</p>
+        <p className="text-red-400 text-lg mb-2">Failed to load TV show details</p>
+        <p className="text-gray-400">Please try again later</p>
       </div>
     );
   }

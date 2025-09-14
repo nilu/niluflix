@@ -65,9 +65,13 @@ const ContentCard: React.FC<ContentCardProps> = ({ content }) => {
         {/* Poster */}
         <div className="relative aspect-[2/3] bg-gray-700 overflow-hidden">
           <img
-            src={`https://image.tmdb.org/t/p/w300${content.poster_path}`}
+            src={content.poster_url || `https://image.tmdb.org/t/p/w300${content.poster_path}`}
             alt={content.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            onError={(e) => {
+              // Fallback to a placeholder if image fails to load
+              e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDMwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iNDUwIiBmaWxsPSIjMzc0MTUxIi8+CjxwYXRoIGQ9Ik0xNTAgMjAwTDEyMCAyMzBIMTgwTDE1MCAyMDBaIiBmaWxsPSIjNkI3MjgwIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMjUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOUI5QjlCIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiPk5vIEltYWdlPC90ZXh0Pgo8L3N2Zz4K';
+            }}
           />
           
           {/* Overlay */}
@@ -117,7 +121,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ content }) => {
             <span>{releaseYear}</span>
             <div className="flex items-center space-x-1">
               <span className="text-yellow-400">★</span>
-              <span>{content.vote_average}</span>
+              <span>{content.vote_average?.toFixed(1) || 'N/A'}</span>
             </div>
           </div>
           

@@ -1,6 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import ContentCard from './ContentCard';
+import { usePopularMovies, useTrendingMovies, useDownloadedMovies, useSearchMovies } from '../../hooks/useMovies';
+import { usePopularTVShows, useTrendingTVShows, useDownloadedTVShows, useSearchTVShows } from '../../hooks/useTVShows';
+import Spinner from '../ui/Spinner';
 
 interface ContentRowProps {
   title: string;
@@ -15,61 +18,135 @@ const ContentRow: React.FC<ContentRowProps> = ({
   category,
   query,
 }) => {
-  // Mock data - TODO: Replace with real data from API
-  const mockContent = [
-    {
-      id: 1,
-      title: 'The Dark Knight',
-      poster_path: '/qJ2tW6WMUDux911r6m7haRef0WH.jpg',
-      vote_average: 8.5,
-      release_date: '2008-07-18',
-      type: 'movie',
-      download_status: 'not_downloaded',
-    },
-    {
-      id: 2,
-      title: 'Inception',
-      poster_path: '/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
-      vote_average: 8.8,
-      release_date: '2010-07-16',
-      type: 'movie',
-      download_status: 'downloading',
-    },
-    {
-      id: 3,
-      title: 'Breaking Bad',
-      poster_path: '/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
-      vote_average: 8.9,
-      first_air_date: '2008-01-20',
-      type: 'tv',
-      download_status: 'downloaded',
-    },
-    {
-      id: 4,
-      title: 'Stranger Things',
-      poster_path: '/49WJfeN0moxb9IPfGn9AIqMGskD.jpg',
-      vote_average: 8.7,
-      first_air_date: '2016-07-15',
-      type: 'tv',
-      download_status: 'not_downloaded',
-    },
-    {
-      id: 5,
-      title: 'The Matrix',
-      poster_path: '/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg',
-      vote_average: 8.7,
-      release_date: '1999-03-30',
-      type: 'movie',
-      download_status: 'downloaded',
-    },
-  ];
+  // Conditionally fetch data based on what's actually needed
+  const shouldFetchPopularMovies = category === 'popular' && type === 'movie';
+  const shouldFetchTrendingMovies = category === 'trending' && type === 'movie';
+  const shouldFetchPopularTVShows = category === 'popular' && type === 'tv';
+  const shouldFetchTrendingTVShows = category === 'trending' && type === 'tv';
+  const shouldFetchDownloadedMovies = category === 'downloaded' && (type === 'movie' || type === 'mixed');
+  const shouldFetchDownloadedTVShows = category === 'downloaded' && (type === 'tv' || type === 'mixed');
+  const shouldFetchSearchMovies = category === 'search' && type === 'movie' && !!query;
+  const shouldFetchSearchTVShows = category === 'search' && type === 'tv' && !!query;
 
-  const filteredContent = mockContent.filter((item) => {
-    if (type !== 'mixed' && item.type !== type) return false;
-    if (category === 'downloaded' && item.download_status !== 'downloaded') return false;
-    if (category === 'search' && query && !item.title.toLowerCase().includes(query.toLowerCase())) return false;
-    return true;
-  });
+  const { data: popularMovies, isLoading: popularMoviesLoading, error: popularMoviesError } = usePopularMovies(1);
+  const { data: trendingMovies, isLoading: trendingMoviesLoading, error: trendingMoviesError } = useTrendingMovies('day', 1);
+  const { data: popularTVShows, isLoading: popularTVShowsLoading, error: popularTVShowsError } = usePopularTVShows(1);
+  const { data: trendingTVShows, isLoading: trendingTVShowsLoading, error: trendingTVShowsError } = useTrendingTVShows('day', 1);
+  
+  // Only call downloaded hooks when needed
+  const { data: downloadedMovies, isLoading: downloadedMoviesLoading, error: downloadedMoviesError } = useDownloadedMovies(1, 20, shouldFetchDownloadedMovies);
+  const { data: downloadedTVShows, isLoading: downloadedTVShowsLoading, error: downloadedTVShowsError } = useDownloadedTVShows(1, 20, shouldFetchDownloadedTVShows);
+  
+  // Search queries
+  const { data: searchMovies, isLoading: searchMoviesLoading, error: searchMoviesError } = useSearchMovies(
+    { query: query || '', page: 1 }, 
+    shouldFetchSearchMovies
+  );
+  const { data: searchTVShows, isLoading: searchTVShowsLoading, error: searchTVShowsError } = useSearchTVShows(
+    { query: query || '', page: 1 }, 
+    shouldFetchSearchTVShows
+  );
+
+  // Determine which data to use
+  const getContentData = () => {
+    if (category === 'search') {
+      if (type === 'movie') return { data: searchMovies, loading: searchMoviesLoading, error: searchMoviesError };
+      if (type === 'tv') return { data: searchTVShows, loading: searchTVShowsLoading, error: searchTVShowsError };
+      // Mixed search - combine both
+      const movies = searchMovies?.results || [];
+      const tvShows = searchTVShows?.results || [];
+      const combined = [...movies.map(m => ({ ...m, type: 'movie' as const })), ...tvShows.map(t => ({ ...t, type: 'tv' as const, title: t.name, release_date: t.first_air_date }))];
+      return { 
+        data: { results: combined }, 
+        loading: searchMoviesLoading || searchTVShowsLoading, 
+        error: searchMoviesError || searchTVShowsError 
+      };
+    }
+    
+    if (category === 'downloaded') {
+      if (type === 'movie') return { data: downloadedMovies, loading: downloadedMoviesLoading, error: downloadedMoviesError };
+      if (type === 'tv') return { data: downloadedTVShows, loading: downloadedTVShowsLoading, error: downloadedTVShowsError };
+      // Mixed downloaded - combine both
+      const movies = downloadedMovies?.results || [];
+      const tvShows = downloadedTVShows?.results || [];
+      const combined = [...movies.map(m => ({ ...m, type: 'movie' as const })), ...tvShows.map(t => ({ ...t, type: 'tv' as const, title: t.name, release_date: t.first_air_date }))];
+      return { 
+        data: { results: combined }, 
+        loading: downloadedMoviesLoading || downloadedTVShowsLoading, 
+        error: downloadedMoviesError || downloadedTVShowsError 
+      };
+    }
+    
+    if (category === 'popular') {
+      if (type === 'movie') return { data: popularMovies, loading: popularMoviesLoading, error: popularMoviesError };
+      if (type === 'tv') return { data: popularTVShows, loading: popularTVShowsLoading, error: popularTVShowsError };
+      // Mixed popular - combine both
+      const movies = popularMovies?.results || [];
+      const tvShows = popularTVShows?.results || [];
+      const combined = [...movies.map(m => ({ ...m, type: 'movie' as const })), ...tvShows.map(t => ({ ...t, type: 'tv' as const, title: t.name, release_date: t.first_air_date }))];
+      return { 
+        data: { results: combined }, 
+        loading: popularMoviesLoading || popularTVShowsLoading, 
+        error: popularMoviesError || popularTVShowsError 
+      };
+    }
+    
+    if (category === 'trending') {
+      if (type === 'movie') return { data: trendingMovies, loading: trendingMoviesLoading, error: trendingMoviesError };
+      if (type === 'tv') return { data: trendingTVShows, loading: trendingTVShowsLoading, error: trendingTVShowsError };
+      // Mixed trending - combine both
+      const movies = trendingMovies?.results || [];
+      const tvShows = trendingTVShows?.results || [];
+      const combined = [...movies.map(m => ({ ...m, type: 'movie' as const })), ...tvShows.map(t => ({ ...t, type: 'tv' as const, title: t.name, release_date: t.first_air_date }))];
+      return { 
+        data: { results: combined }, 
+        loading: trendingMoviesLoading || trendingTVShowsLoading, 
+        error: trendingMoviesError || trendingTVShowsError 
+      };
+    }
+    
+    return { data: null, loading: false, error: null };
+  };
+
+  const { data, loading, error } = getContentData();
+  const content = data?.results || [];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-white">{title}</h2>
+        <div className="flex items-center justify-center py-8">
+          <Spinner size="lg" />
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-white">{title}</h2>
+        <div className="flex items-center justify-center py-8">
+          <p className="text-red-400">Failed to load content. Please try again.</p>
+          <p className="text-red-300 text-sm mt-2">{error.message || String(error)}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (!content || content.length === 0) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-white">{title}</h2>
+        <div className="flex items-center justify-center py-8">
+          <p className="text-gray-400">No content available.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -77,15 +154,23 @@ const ContentRow: React.FC<ContentRowProps> = ({
       
       <div className="relative">
         <div className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
-          {filteredContent.map((content, index) => (
+          {content.map((item, index) => (
             <motion.div
-              key={content.id}
+              key={item.id}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
               className="flex-shrink-0"
             >
-              <ContentCard content={content} />
+              <ContentCard content={{
+                id: item.id,
+                title: item.title || item.name,
+                poster_path: item.poster_path,
+                vote_average: item.vote_average,
+                release_date: item.release_date || item.first_air_date,
+                type: item.type || (item.name ? 'tv' : 'movie'),
+                download_status: item.download_status || 'not_downloaded',
+              }} />
             </motion.div>
           ))}
         </div>
