@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// SQLite database for desktop app
+datasource db {
+  provider = "sqlite"
+  url      = "file:./database/niluflix.db"
+}
+
+// =============================================================================
+// CORE CONTENT MODELS
+// =============================================================================
+
+model Movie {
+  id               Int      @id @default(autoincrement())
+  tmdbId           Int      @unique @map("tmdb_id")
+  title            String
+  overview         String?
+  posterPath       String?  @map("poster_path")
+  backdropPath     String?  @map("backdrop_path")
+  releaseDate      String?  @map("release_date")
+  runtime          Int?
+  voteAverage      Float?   @map("vote_average")
+  genres           String?  // JSON array
+  downloadStatus   String   @default("not_downloaded") @map("download_status")
+  filePath         String?  @map("file_path")
+  fileSize         Int?     @map("file_size")
+  downloadProgress Float    @default(0) @map("download_progress")
+  magnetLink       String?  @map("magnet_link")
+  torrentName      String?  @map("torrent_name")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("movies")
+}
+
+model TVShow {
+  id               Int      @id @default(autoincrement())
+  tmdbId           Int      @unique @map("tmdb_id")
+  name             String
+  overview         String?
+  posterPath       String?  @map("poster_path")
+  backdropPath     String?  @map("backdrop_path")
+  firstAirDate     String?  @map("first_air_date")
+  lastAirDate      String?  @map("last_air_date")
+  numberOfSeasons  Int?     @map("number_of_seasons")
+  numberOfEpisodes Int?     @map("number_of_episodes")
+  voteAverage      Float?   @map("vote_average")
+  genres           String?  // JSON array
+  status           String?  // 'Ended', 'Returning Series', etc.
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  episodes Episode[]
+
+  @@map("tv_shows")
+}
+
+model Episode {
+  id               Int      @id @default(autoincrement())
+  tvShowId         Int      @map("tv_show_id")
+  tmdbEpisodeId    Int?     @map("tmdb_episode_id")
+  seasonNumber     Int      @map("season_number")
+  episodeNumber    Int      @map("episode_number")
+  name             String?
+  overview         String?
+  airDate          String?  @map("air_date")
+  runtime          Int?
+  voteAverage      Float?   @map("vote_average")
+  downloadStatus   String   @default("not_downloaded") @map("download_status")
+  filePath         String?  @map("file_path")
+  fileSize         Int?     @map("file_size")
+  downloadProgress Float    @default(0) @map("download_progress")
+  magnetLink       String?  @map("magnet_link")
+  torrentName      String?  @map("torrent_name")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  tvShow TVShow @relation(fields: [tvShowId], references: [id], onDelete: Cascade)
+
+  @@unique([tvShowId, seasonNumber, episodeNumber])
+  @@map("episodes")
+}
+
+// =============================================================================
+// DOWNLOAD MANAGEMENT
+// =============================================================================
+
+model DownloadQueue {
+  id            Int      @id @default(autoincrement())
+  contentType   String   @map("content_type") // 'movie' or 'episode'
+  contentId     Int      @map("content_id")
+  torrentMagnet String   @map("torrent_magnet")
+  torrentName   String   @map("torrent_name")
+  priority      Int      @default(0)
+  status        String   @default("queued") // 'queued', 'downloading', 'completed', 'failed'
+  progress      Float    @default(0)
+  downloadSpeed Int      @default(0) @map("download_speed")
+  eta           Int      @default(0)
+  createdAt     DateTime @default(now()) @map("created_at")
+  startedAt     DateTime? @map("started_at")
+  completedAt   DateTime? @map("completed_at")
+
+  @@map("download_queue")
+}
+
+// =============================================================================
+// SETTINGS & CONFIGURATION
+// =============================================================================
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+// =============================================================================
+// DOWNLOAD HISTORY & ANALYTICS
+// =============================================================================
+
+model DownloadHistory {
+  id          Int      @id @default(autoincrement())
+  contentType String   @map("content_type")
+  contentId   Int      @map("content_id")
+  title       String
+  fileSize    Int?     @map("file_size")
+  downloadTime Int?    @map("download_time") // in seconds
+  quality     String?
+  status      String   // 'completed', 'failed', 'cancelled'
+  createdAt   DateTime @default(now()) @map("created_at")
+  completedAt DateTime? @map("completed_at")
+
+  @@map("download_history")
+}

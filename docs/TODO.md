@@ -59,17 +59,17 @@
   - [x] Setup environment variable loading
   - [x] Configure different environments (dev, production)
 
-### Step 2: Database Layer & Core Models
-- [ ] **2.1** Database setup
-  - [ ] Initialize SQLite database (desktop app)
-  - [ ] Setup Supabase project (web interface)
-  - [ ] Setup Prisma ORM configuration for both databases
-  - [ ] Create database schemas (movies, tv_shows, episodes, download_queue)
-- [ ] **2.2** Database migrations
-  - [ ] Create initial migration files for SQLite
-  - [ ] Create Supabase migration files
-  - [ ] Setup seed data for development
-  - [ ] Database connection and error handling
+### Step 2: Database Layer & Core Models ✅ COMPLETED
+- [x] **2.1** Database setup
+  - [x] Initialize SQLite database (desktop app)
+  - [x] Setup Supabase project (web interface)
+  - [x] Setup Prisma ORM configuration for both databases
+  - [x] Create database schemas (movies, tv_shows, episodes, download_queue)
+- [x] **2.2** Database migrations
+  - [x] Create initial migration files for SQLite
+  - [x] Create Supabase migration files
+  - [x] Setup seed data for development
+  - [x] Database connection and error handling
 
 ### Step 3: Backend API Foundation
 - [ ] **3.1** Express server setup
