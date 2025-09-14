@@ -1,6 +1,29 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 console.log('App.tsx loaded!');
+
+// Simple test pages for navigation
+const HomePage = () => (
+  <div className="p-5">
+    <h2 className="text-2xl font-bold mb-4">🏠 Home Page</h2>
+    <p>Welcome to NiluFlix! Browse your favorite movies and TV shows.</p>
+  </div>
+);
+
+const MoviesPage = () => (
+  <div className="p-5">
+    <h2 className="text-2xl font-bold mb-4">🎬 Movies</h2>
+    <p>Discover amazing movies here.</p>
+  </div>
+);
+
+const TVShowsPage = () => (
+  <div className="p-5">
+    <h2 className="text-2xl font-bold mb-4">📺 TV Shows</h2>
+    <p>Browse your favorite TV series.</p>
+  </div>
+);
 
 const App: React.FC = () => {
   console.log('App component rendering...');
@@ -10,23 +33,38 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-black text-white min-h-screen p-5 font-sans" style={{backgroundColor: '#000', color: '#fff', minHeight: '100vh', padding: '20px'}}>
-      <h1 className="text-red-600 text-5xl font-bold mb-5" style={{color: '#e50914', fontSize: '3rem', fontWeight: 'bold', marginBottom: '20px'}}>
-        NILUFLIX
-      </h1>
-      
-      <p className="text-xl mb-5" style={{fontSize: '1.25rem', marginBottom: '20px'}}>
-        React App is Working!
-      </p>
-      
-      <div className="bg-gray-900 border border-gray-700 p-5 rounded-lg mt-5" style={{backgroundColor: '#1f2937', border: '1px solid #374151', padding: '20px', borderRadius: '8px', marginTop: '20px'}}>
-        <h2 className="text-green-400 mb-2 font-semibold" style={{color: '#4ade80', marginBottom: '8px', fontWeight: '600'}}>✅ Status Check</h2>
-        <p className="mb-1" style={{marginBottom: '4px'}}>✅ React component loaded</p>
-        <p className="mb-1" style={{marginBottom: '4px'}}>✅ CSS Debug Mode (inline + Tailwind)</p>
-        <p className="mb-1" style={{marginBottom: '4px'}}>✅ JavaScript executing</p>
-        <p>⏰ Current time: {new Date().toLocaleTimeString()}</p>
+    <Router>
+      <div className="bg-black text-white min-h-screen">
+        {/* Header with Navigation */}
+        <header className="bg-gray-900 border-b border-gray-700 p-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-red-600 text-3xl font-bold">NILUFLIX</h1>
+            
+            <nav className="flex space-x-6">
+              <Link to="/" className="text-white hover:text-red-500 transition-colors">Home</Link>
+              <Link to="/movies" className="text-white hover:text-red-500 transition-colors">Movies</Link>
+              <Link to="/tv" className="text-white hover:text-red-500 transition-colors">TV Shows</Link>
+            </nav>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/movies" element={<MoviesPage />} />
+            <Route path="/tv" element={<TVShowsPage />} />
+          </Routes>
+        </main>
+
+        {/* Status Check */}
+        <div className="fixed bottom-4 right-4 bg-gray-800 border border-gray-600 p-3 rounded-lg text-sm">
+          <h3 className="text-green-400 font-semibold mb-1">✅ Status</h3>
+          <p>✅ React Router working</p>
+          <p>✅ Tailwind v4.1 PostCSS</p>
+        </div>
       </div>
-    </div>
+    </Router>
   );
 };
 
