@@ -229,6 +229,20 @@ class TMDBClient {
     async getTVGenres() {
         return this.makeRequest('/genre/tv/list', {}, 24 * 7); // Cache for a week
     }
+    async getMoviesByGenre(genreId, page = 1) {
+        return this.makeRequest('/discover/movie', {
+            with_genres: genreId,
+            page,
+            sort_by: 'popularity.desc'
+        });
+    }
+    async getTVShowsByGenre(genreId, page = 1) {
+        return this.makeRequest('/discover/tv', {
+            with_genres: genreId,
+            page,
+            sort_by: 'popularity.desc'
+        });
+    }
     // Configuration
     async getConfiguration() {
         return this.makeRequest('/configuration', {}, 24 * 7); // Cache for a week
@@ -252,4 +266,3 @@ class TMDBClient {
     }
 }
 exports.TMDBClient = TMDBClient;
-//# sourceMappingURL=tmdb-client.js.map
