@@ -1,15 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import ContentCard from './ContentCard';
-import { usePopularMovies, useTrendingMovies, useDownloadedMovies, useSearchMovies } from '../../hooks/useMovies';
-import { usePopularTVShows, useTrendingTVShows, useDownloadedTVShows, useSearchTVShows } from '../../hooks/useTVShows';
+import { usePopularMovies, useTrendingMovies, useDownloadedMovies, useSearchMovies, useMoviesByGenre } from '../../hooks/useMovies';
+import { usePopularTVShows, useTrendingTVShows, useDownloadedTVShows, useSearchTVShows, useTVShowsByGenre } from '../../hooks/useTVShows';
 import Spinner from '../ui/Spinner';
 
 interface ContentRowProps {
   title: string;
   type: 'movie' | 'tv' | 'mixed';
-  category: 'trending' | 'popular' | 'downloaded' | 'search';
+  category: 'trending' | 'popular' | 'downloaded' | 'search' | 'genre';
   query?: string;
+  genreId?: number;
 }
 
 const ContentRow: React.FC<ContentRowProps> = ({
@@ -17,6 +18,7 @@ const ContentRow: React.FC<ContentRowProps> = ({
   type,
   category,
   query,
+  genreId,
 }) => {
   // Conditionally fetch data based on what's actually needed
   const shouldFetchPopularMovies = category === 'popular' && type === 'movie';
@@ -27,6 +29,8 @@ const ContentRow: React.FC<ContentRowProps> = ({
   const shouldFetchDownloadedTVShows = category === 'downloaded' && (type === 'tv' || type === 'mixed');
   const shouldFetchSearchMovies = category === 'search' && type === 'movie' && !!query;
   const shouldFetchSearchTVShows = category === 'search' && type === 'tv' && !!query;
+  const shouldFetchGenreMovies = category === 'genre' && type === 'movie' && !!genreId;
+  const shouldFetchGenreTVShows = category === 'genre' && type === 'tv' && !!genreId;
 
   const { data: popularMovies, isLoading: popularMoviesLoading, error: popularMoviesError } = usePopularMovies(1);
   const { data: trendingMovies, isLoading: trendingMoviesLoading, error: trendingMoviesError } = useTrendingMovies('day', 1);
@@ -45,6 +49,18 @@ const ContentRow: React.FC<ContentRowProps> = ({
   const { data: searchTVShows, isLoading: searchTVShowsLoading, error: searchTVShowsError } = useSearchTVShows(
     { query: query || '', page: 1 }, 
     shouldFetchSearchTVShows
+  );
+
+  // Genre queries
+  const { data: genreMovies, isLoading: genreMoviesLoading, error: genreMoviesError } = useMoviesByGenre(
+    genreId || 0, 
+    1, 
+    shouldFetchGenreMovies
+  );
+  const { data: genreTVShows, isLoading: genreTVShowsLoading, error: genreTVShowsError } = useTVShowsByGenre(
+    genreId || 0, 
+    1, 
+    shouldFetchGenreTVShows
   );
 
   // Determine which data to use
@@ -102,6 +118,20 @@ const ContentRow: React.FC<ContentRowProps> = ({
         data: { results: combined }, 
         loading: trendingMoviesLoading || trendingTVShowsLoading, 
         error: trendingMoviesError || trendingTVShowsError 
+      };
+    }
+    
+    if (category === 'genre') {
+      if (type === 'movie') return { data: genreMovies, loading: genreMoviesLoading, error: genreMoviesError };
+      if (type === 'tv') return { data: genreTVShows, loading: genreTVShowsLoading, error: genreTVShowsError };
+      // Mixed genre - combine both
+      const movies = genreMovies?.results || [];
+      const tvShows = genreTVShows?.results || [];
+      const combined = [...movies.map(m => ({ ...m, type: 'movie' as const })), ...tvShows.map(t => ({ ...t, type: 'tv' as const, title: t.name, release_date: t.first_air_date }))];
+      return { 
+        data: { results: combined }, 
+        loading: genreMoviesLoading || genreTVShowsLoading, 
+        error: genreMoviesError || genreTVShowsError 
       };
     }
     

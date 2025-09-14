@@ -1,37 +1,100 @@
 import React from 'react';
+import HeroSection from '../components/content/HeroSection';
+import ContentRow from '../components/content/ContentRow';
+import GenreContentRow from '../components/content/GenreContentRow';
 
 const HomePage: React.FC = () => {
   return (
-    <div className="py-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="space-y-8">
-          <h1 className="text-4xl font-bold text-white mb-8">
-            Welcome to NiluFlix
-          </h1>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-              <h2 className="text-xl font-semibold text-white mb-4">🎬 Movies</h2>
-              <p className="text-gray-400">Browse and download the latest movies</p>
-            </div>
-            
-            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-              <h2 className="text-xl font-semibold text-white mb-4">📺 TV Shows</h2>
-              <p className="text-gray-400">Watch your favorite TV series</p>
-            </div>
-            
-            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-              <h2 className="text-xl font-semibold text-white mb-4">📚 Library</h2>
-              <p className="text-gray-400">Access your downloaded content</p>
-            </div>
-          </div>
-          
-          <div className="mt-8 p-6 bg-green-500/10 border border-green-500/30 rounded-lg">
-            <h3 className="text-lg font-semibold text-green-400 mb-2">✅ React App Working!</h3>
-            <p className="text-gray-300">The React app is now successfully running inside Electron.</p>
-            <p className="text-gray-300 mt-2">Click the search icon in the header to test the click functionality.</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-black">
+      {/* Hero Section with Featured Content */}
+      <HeroSection />
+      
+      {/* Content Rows */}
+      <div className="space-y-8 py-8">
+        {/* Trending Movies */}
+        <ContentRow
+          title="Trending Movies"
+          type="movie"
+          category="trending"
+        />
+        
+        {/* Popular Movies */}
+        <ContentRow
+          title="Popular Movies"
+          type="movie"
+          category="popular"
+        />
+        
+        {/* Trending TV Shows */}
+        <ContentRow
+          title="Trending TV Shows"
+          type="tv"
+          category="trending"
+        />
+        
+        {/* Popular TV Shows */}
+        <ContentRow
+          title="Popular TV Shows"
+          type="tv"
+          category="popular"
+        />
+        
+        {/* Mixed Trending Content */}
+        <ContentRow
+          title="Trending Now"
+          type="mixed"
+          category="trending"
+        />
+        
+        {/* Mixed Popular Content */}
+        <ContentRow
+          title="What's Popular"
+          type="mixed"
+          category="popular"
+        />
+
+        {/* Genre-based Content Rows */}
+        <GenreContentRow
+          title="Action Movies"
+          type="movie"
+          genreName="Action"
+          genreId={28}
+        />
+
+        <GenreContentRow
+          title="Comedy Movies"
+          type="movie"
+          genreName="Comedy"
+          genreId={35}
+        />
+
+        <GenreContentRow
+          title="Drama TV Shows"
+          type="tv"
+          genreName="Drama"
+          genreId={18}
+        />
+
+        <GenreContentRow
+          title="Sci-Fi & Fantasy"
+          type="mixed"
+          genreName="Sci-Fi & Fantasy"
+          genreId={878}
+        />
+
+        <GenreContentRow
+          title="Horror Movies"
+          type="movie"
+          genreName="Horror"
+          genreId={27}
+        />
+
+        <GenreContentRow
+          title="Romance Movies"
+          type="movie"
+          genreName="Romance"
+          genreId={10749}
+        />
       </div>
     </div>
   );
