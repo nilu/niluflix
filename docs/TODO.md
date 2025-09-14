@@ -132,7 +132,7 @@
 ### Step 8: Core User Features
 - [ ] **8.1** Content browsing
   - [ ] Home feed with latest releases
-  - [ ] Search functionality
+  - [x] Search functionality
   - [ ] Category/genre filtering
   - [ ] Content detail pages
 - [ ] **8.2** Download functionality
