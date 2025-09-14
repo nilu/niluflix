@@ -83,17 +83,17 @@
   - [x] Downloads endpoints (`/api/downloads/*`)
   - [x] Health check endpoint
 
-### Step 4: External API Integration
-- [ ] **4.1** TMDB API integration
-  - [ ] API client setup with rate limiting
-  - [ ] Movie search and details endpoints
-  - [ ] TV show and episode data fetching
-  - [ ] Image URL generation and caching
-- [ ] **4.2** Torrent search integration
-  - [ ] torrent-search-api setup
-  - [ ] Quality preference algorithm (1080p → 720p → 4K)
-  - [ ] Seeder count optimization
-  - [ ] Magnet link generation
+### Step 4: External API Integration ✅ COMPLETED
+- [x] **4.1** TMDB API integration
+  - [x] API client setup with rate limiting
+  - [x] Movie search and details endpoints
+  - [x] TV show and episode data fetching
+  - [x] Image URL generation and caching
+- [x] **4.2** Torrent search integration
+  - [x] torrent-search-api setup
+  - [x] Quality preference algorithm (1080p → 720p → 4K)
+  - [x] Seeder count optimization
+  - [x] Magnet link generation
 
 ### Step 5: Torrenting Engine
 - [ ] **5.1** Torrent client integration
