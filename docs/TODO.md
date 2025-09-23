@@ -136,7 +136,7 @@
   - [ ] Category/genre filtering
   - [ ] Content detail pages
 - [ ] **8.2** Download functionality
-  - [ ] One-click movie downloads
+  - [x] One-click movie downloads
   - [ ] TV show season/episode selection
   - [ ] Download progress visualization
   - [ ] Download queue management
