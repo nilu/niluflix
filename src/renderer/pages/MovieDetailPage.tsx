@@ -1,7 +1,7 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { PlayIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PlayIcon, PlusIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
 import DownloadButton from '../components/downloads/DownloadButton';
@@ -10,7 +10,8 @@ import { useMovieDetails, useDownloadMovie } from '../hooks/useMovies';
 const MovieDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const movieId = id ? parseInt(id) : 0;
-  
+  const navigate = useNavigate();
+
   const { data: movie, isLoading, error } = useMovieDetails(movieId);
   const downloadMovie = useDownloadMovie();
 
@@ -39,12 +40,26 @@ const MovieDetailPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      {/* Back Button */}
+      <div className="flex items-center">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="flex items-center space-x-2 text-gray-300 hover:text-white"
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+          <span>Back</span>
+        </Button>
+      </div>
+
       {/* Hero Section */}
       <div className="relative h-96 rounded-lg overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`,
+            backgroundImage: movie.backdrop_path 
+              ? `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`
+              : `url(https://image.tmdb.org/t/p/original${movie.poster_path})`
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
@@ -54,22 +69,28 @@ const MovieDetailPage: React.FC = () => {
             <h1 className="text-4xl font-bold text-white mb-4">{movie.title}</h1>
             <div className="flex items-center space-x-4 mb-4">
               <span className="text-green-400 font-semibold">
-                {movie.vote_average}/10
+                {movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}/10
               </span>
-              <span className="text-gray-300">{movie.release_date}</span>
-              <span className="text-gray-300">{movie.runtime} min</span>
+              <span className="text-gray-300">{movie.release_date || 'Release date unknown'}</span>
+              <span className="text-gray-300">{movie.runtime ? `${movie.runtime} min` : 'Runtime unknown'}</span>
             </div>
             <div className="flex flex-wrap gap-2 mb-6">
-              {movie.genres.map((genre: string) => (
+              {movie.genres && movie.genres.length > 0 ? movie.genres.map((genre: any, index: number) => (
                 <span
-                  key={genre}
+                  key={index}
                   className="px-3 py-1 bg-white/20 rounded-full text-sm text-white"
                 >
-                  {genre}
+                  {typeof genre === 'string' ? genre : genre.name || genre.id || 'Unknown'}
                 </span>
-              ))}
+              )) : (
+                <span className="px-3 py-1 bg-white/20 rounded-full text-sm text-white">
+                  No genres available
+                </span>
+              )}
             </div>
-            <p className="text-gray-300 text-lg leading-relaxed">{movie.overview}</p>
+            <p className="text-gray-300 text-lg leading-relaxed">
+              {movie.overview || 'No overview available for this movie.'}
+            </p>
           </div>
         </div>
       </div>
