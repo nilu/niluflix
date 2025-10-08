@@ -5,6 +5,7 @@ import AppLayout from './components/layout/AppLayout';
 import NotificationManager from './components/downloads/NotificationManager';
 import HomePage from './pages/HomePage';
 import MoviesPage from './pages/MoviesPage';
+import TVShowsPage from './pages/TVShowsPage';
 import MovieDetailPage from './pages/MovieDetailPage';
 import TVShowDetailPage from './pages/TVShowDetailPage';
 import LibraryPage from './pages/LibraryPage';
@@ -39,6 +40,7 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/movies" element={<MoviesPage />} />
+              <Route path="/tv" element={<TVShowsPage />} />
               <Route path="/movie/:id" element={<MovieDetailPage />} />
               <Route path="/tv/:id" element={<TVShowDetailPage />} />
               <Route path="/library" element={<LibraryPage />} />

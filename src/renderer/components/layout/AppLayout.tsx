@@ -66,14 +66,14 @@ const Header = () => {
             >
               Movies
             </button>
-            <Link 
-              to="/tv" 
-              className={`transition-colors ${
-                location.pathname === '/tv' ? 'text-white' : 'text-gray-300 hover:text-white'
+            <button
+              className={`px-3 py-2 rounded-md transition-colors cursor-pointer ${
+                location.pathname === '/tv' ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white hover:bg-white/5'
               }`}
+              onClick={() => navigate('/tv')}
             >
               TV Shows
-            </Link>
+            </button>
             <Link 
               to="/library" 
               className={`transition-colors ${
@@ -174,19 +174,19 @@ const Sidebar = () => {
             </svg>
             Movies
           </button>
-          <Link 
-            to="/tv" 
-            className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
+          <button
+            className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer w-full text-left ${
               location.pathname === '/tv' 
                 ? 'bg-white/10 text-white' 
                 : 'text-gray-300 hover:bg-white/10 hover:text-white'
             }`}
+            onClick={() => navigate('/tv')}
           >
             <svg className="mr-3 h-5 w-5 text-gray-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             TV Shows
-          </Link>
+          </button>
           <Link 
             to="/library" 
             className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
