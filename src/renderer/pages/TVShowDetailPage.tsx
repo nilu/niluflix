@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { PlayIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PlayIcon, PlusIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
-import DownloadButton from '../components/downloads/DownloadButton';
-import SeasonEpisodeSelector from '../components/downloads/SeasonEpisodeSelector';
-import { useTVShowDetails, useDownloadTVShow, useDownloadEpisode } from '../hooks/useTVShows';
+import { useTVShowDetails, useDownloadTVShow } from '../hooks/useTVShows';
 
 const TVShowDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,52 +12,10 @@ const TVShowDetailPage: React.FC = () => {
   
   const { data: show, isLoading, error } = useTVShowDetails(tvId);
   const downloadTVShow = useDownloadTVShow();
-  const downloadEpisode = useDownloadEpisode();
-  
-  const [selectedSeasons, setSelectedSeasons] = useState<number[]>([]);
-  const [selectedEpisodes, setSelectedEpisodes] = useState<{ [seasonNumber: number]: number[] }>({});
 
-  const handleDownloadAll = () => {
+  const handleDownload = () => {
     if (show) {
-      downloadTVShow.mutate({ id: show.id, seasons: selectedSeasons });
-    }
-  };
-
-  const handleSeasonToggle = (seasonNumber: number) => {
-    setSelectedSeasons(prev => 
-      prev.includes(seasonNumber) 
-        ? prev.filter(s => s !== seasonNumber)
-        : [...prev, seasonNumber]
-    );
-  };
-
-  const handleEpisodeToggle = (seasonNumber: number, episodeNumber: number) => {
-    setSelectedEpisodes(prev => {
-      const seasonEpisodes = prev[seasonNumber] || [];
-      const isSelected = seasonEpisodes.includes(episodeNumber);
-      
-      return {
-        ...prev,
-        [seasonNumber]: isSelected
-          ? seasonEpisodes.filter(ep => ep !== episodeNumber)
-          : [...seasonEpisodes, episodeNumber]
-      };
-    });
-  };
-
-  const handleDownloadSeason = (seasonNumber: number) => {
-    if (show) {
-      downloadTVShow.mutate({ id: show.id, seasons: [seasonNumber] });
-    }
-  };
-
-  const handleDownloadEpisode = (seasonNumber: number, episodeNumber: number) => {
-    if (show) {
-      downloadEpisode.mutate({ 
-        tvId: show.id, 
-        seasonNumber, 
-        episodeNumber 
-      });
+      downloadTVShow.mutate({ id: show.id });
     }
   };
 
@@ -130,28 +86,42 @@ const TVShowDetailPage: React.FC = () => {
           <span>Add to Library</span>
         </Button>
         
-        <DownloadButton
-          contentId={show.id}
-          contentType="tv_show"
-          title={show.name}
-          downloadStatus={show.download_status}
-          onDownload={handleDownloadAll}
-          size="lg"
-          variant="outline"
-        />
+        <Button variant="outline" size="lg" className="flex items-center space-x-2">
+          <ArrowDownTrayIcon className="w-5 h-5" />
+          <span>Download All Seasons</span>
+        </Button>
       </div>
 
-      {/* Season & Episode Selector */}
-      <SeasonEpisodeSelector
-        seasons={show.seasons || []}
-        selectedSeasons={selectedSeasons}
-        selectedEpisodes={selectedEpisodes}
-        onSeasonToggle={handleSeasonToggle}
-        onEpisodeToggle={handleEpisodeToggle}
-        onDownloadSeason={handleDownloadSeason}
-        onDownloadEpisode={handleDownloadEpisode}
-        onDownloadAll={handleDownloadAll}
-      />
+      {/* Seasons */}
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-white">Seasons</h2>
+        {Array.from({ length: show.number_of_seasons }, (_, i) => i + 1).map((season) => (
+          <div key={season} className="bg-white/5 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white">Season {season}</h3>
+              <Button variant="outline" size="sm">
+                Download Season
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((episode) => (
+                <div key={episode} className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white">Episode {episode}</span>
+                    <span className="text-xs text-gray-400">42 min</span>
+                  </div>
+                  <h4 className="text-sm text-gray-300 mb-2">
+                    Episode Title {episode}
+                  </h4>
+                  <Button variant="ghost" size="sm" className="w-full">
+                    Download
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
