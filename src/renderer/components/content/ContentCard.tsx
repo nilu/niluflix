@@ -5,6 +5,7 @@ import { PlayIcon, PlusIcon } from '@heroicons/react/24/outline';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import DownloadButton from '../downloads/DownloadButton';
+import { useDownloadModal } from '../../contexts/DownloadModalContext';
 
 interface ContentCardProps {
   content: {
@@ -19,7 +20,7 @@ interface ContentCardProps {
     download_status?: 'not_downloaded' | 'downloading' | 'downloaded' | 'failed';
     download_progress?: number;
   };
-  onDownload?: (contentId: number, options?: any) => void;
+  onDownload?: (contentId: number, contentType: string, options?: any) => void;
   onPause?: (contentId: number) => void;
   onResume?: (contentId: number) => void;
   onCancel?: (contentId: number) => void;
@@ -34,13 +35,91 @@ const ContentCard: React.FC<ContentCardProps> = ({
   onCancel, 
   onRetry 
 }) => {
+  
   const [isHovered, setIsHovered] = React.useState(false);
+  const { openModal } = useDownloadModal();
   
   const releaseYear = content.release_date 
     ? new Date(content.release_date).getFullYear()
     : content.first_air_date 
     ? new Date(content.first_air_date).getFullYear()
     : '';
+
+  const handleDownload = async (contentId: number, options?: any) => {
+    if (onDownload) {
+      try {
+        // Open modal immediately with initial state
+        const initialData = {
+          jobId: `temp_${Date.now()}`,
+          movie: {
+            id: contentId,
+            title: content.title,
+            poster_path: content.poster_path,
+            release_date: content.release_date || content.first_air_date
+          },
+          steps: [
+            {
+              id: 'movie_details',
+              title: 'Getting movie details',
+              description: 'Fetching movie information...',
+              status: 'completed' as const
+            },
+            {
+              id: 'torrent_search',
+              title: 'Searching for torrents',
+              description: 'Finding available downloads...',
+              status: 'active' as const
+            },
+            {
+              id: 'queue_add',
+              title: 'Adding to download queue',
+              description: 'Preparing download...',
+              status: 'pending' as const
+            },
+            {
+              id: 'torrent_start',
+              title: 'Starting torrent download',
+              description: 'Connecting to peers...',
+              status: 'pending' as const
+            },
+            {
+              id: 'downloading',
+              title: 'Downloading',
+              description: 'Download in progress...',
+              status: 'pending' as const
+            },
+            {
+              id: 'organizing',
+              title: 'Organizing files',
+              description: 'Moving files to organized structure',
+              status: 'pending' as const
+            },
+            {
+              id: 'completed',
+              title: 'Download complete',
+              description: 'Ready to watch!',
+              status: 'pending' as const
+            }
+          ],
+          currentStep: 'torrent_search',
+          progress: 0
+        };
+        
+        openModal(initialData);
+        
+        // Call the original download handler
+        const result = await onDownload(contentId, content.type === 'tv' ? 'tv_show' : 'movie', options);
+        
+        // Update modal with real data from API response
+        if (result && typeof result === 'object' && 'data' in result && result.data && typeof result.data === 'object' && 'steps' in result.data) {
+          openModal(result.data as any);
+        }
+      } catch (error) {
+        console.error('Download failed:', error);
+      }
+    }
+  };
+
 
 
   return (
@@ -91,8 +170,23 @@ const ContentCard: React.FC<ContentCardProps> = ({
               <div className="absolute top-2 right-2">
                 <div className="flex items-center space-x-1 bg-black/70 rounded px-2 py-1">
                   <span className="text-xs text-white">
-                    {content.download_status.charAt(0).toUpperCase() + content.download_status.slice(1)}
+                    {content.download_status === 'downloading' ? 
+                      `${Math.round(content.download_progress || 0)}%` :
+                      content.download_status.charAt(0).toUpperCase() + content.download_status.slice(1)
+                    }
                   </span>
+                </div>
+              </div>
+            )}
+            
+            {/* Download Progress Bar */}
+            {content.download_status === 'downloading' && (
+              <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
+                <div className="w-full bg-gray-600 rounded-full h-1">
+                  <div 
+                    className="bg-red-600 h-1 rounded-full transition-all duration-300"
+                    style={{ width: `${content.download_progress || 0}%` }}
+                  />
                 </div>
               </div>
             )}
@@ -123,7 +217,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
           title={content.title}
           downloadStatus={content.download_status}
           progress={content.download_progress}
-          onDownload={onDownload}
+          onDownload={handleDownload}
           onPause={onPause}
           onResume={onResume}
           onCancel={onCancel}
@@ -131,9 +225,10 @@ const ContentCard: React.FC<ContentCardProps> = ({
           size="sm"
           variant="ghost"
           className="w-full"
-          showProgress={false}
+          showProgress={true}
         />
       </div>
+
     </motion.div>
   );
 };

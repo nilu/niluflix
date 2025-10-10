@@ -25,12 +25,30 @@ const ContentRow: React.FC<ContentRowProps> = ({
   const downloadTVShow = useDownloadTVShow();
 
   // Download handlers
-  const handleDownload = (contentId: number, contentType: string, options?: any) => {
+  const handleDownload = async (contentId: number, contentType: string, options?: any) => {
+    console.log('🎬 ContentRow: handleDownload called', { contentId, contentType, options });
+    
     if (contentType === 'movie') {
-      downloadMovie.mutate({ id: contentId, quality: options?.quality });
+      console.log('🎬 ContentRow: Calling downloadMovie.mutateAsync');
+      const result = await downloadMovie.mutateAsync({ id: contentId, quality: options?.quality });
+      console.log('🎬 ContentRow: downloadMovie result', result);
+      return result;
     } else if (contentType === 'tv_show') {
-      downloadTVShow.mutate({ id: contentId, seasons: options?.seasons, quality: options?.quality });
+      console.log('🎬 ContentRow: Calling downloadTVShow.mutateAsync');
+      const result = await downloadTVShow.mutateAsync({ id: contentId, seasons: options?.seasons, quality: options?.quality });
+      console.log('🎬 ContentRow: downloadTVShow result', result);
+      return result;
     }
+  };
+
+  // Get download status for content
+  const getDownloadStatus = (content: any) => {
+    // This will be populated by the API response
+    return content.download_status || 'not_downloaded';
+  };
+
+  const getDownloadProgress = (content: any) => {
+    return content.download_progress || 0;
   };
 
   const handlePause = (contentId: number) => {
