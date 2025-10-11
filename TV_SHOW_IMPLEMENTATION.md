@@ -273,3 +273,4 @@ The existing Prisma schema already includes the necessary tables:
 - Proper relationships and constraints
 
 No database migrations are needed as the schema is already in place.
+

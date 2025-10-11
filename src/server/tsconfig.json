@@ -17,7 +17,8 @@
     "./**/*.ts",
     "./**/*.tsx",
     "../shared/**/*.ts",
-    "../shared/**/*.tsx"
+    "../shared/**/*.tsx",
+    "../shared/**/*.js"
   ],
   "exclude": [
     "**/*.test.ts"
