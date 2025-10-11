@@ -82,10 +82,16 @@ class DatabaseManager {
   async connect() {
     try {
       await this.connectSQLite();
-      await this.connectSupabase();
+      
+      // Try to connect to Supabase, but don't fail if it doesn't work
+      try {
+        await this.connectSupabase();
+      } catch (supabaseError) {
+        logger.warn('⚠️ Supabase connection failed, continuing with SQLite only:', supabaseError.message);
+      }
       
       this.isConnected = true;
-      logger.info('🎉 All database connections established');
+      logger.info('🎉 Database connections established');
     } catch (error) {
       logger.error('💥 Database connection failed:', error);
       throw error;
