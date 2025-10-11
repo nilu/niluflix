@@ -2,11 +2,17 @@ const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 
+// Import memory manager (will be available after TypeScript compilation)
+// const MemoryManager = require('../shared/services/memory-manager').default;
+
 // Skip hardware acceleration disable for now to avoid crashes
 // app.disableHardwareAcceleration();
 
 // Global variable to store the API server process
 let apiServerProcess = null;
+
+// Initialize memory manager (commented out until TypeScript compilation)
+// const memoryManager = MemoryManager.getInstance();
 
 function startApiServer() {
   const isDev = process.argv.includes('--dev');

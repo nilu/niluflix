@@ -24,7 +24,13 @@
     "format": "prettier --write src/**/*.{js,ts,tsx,css,html}",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:integration": "node scripts/test-download-integration.js"
+    "test:integration": "node scripts/test-download-integration.js",
+    "start:optimized": "node --expose-gc --max-old-space-size=2048 src/main/main.js",
+    "dev:optimized": "node --expose-gc --max-old-space-size=2048 --inspect src/main/main.js",
+    "memory:check": "node scripts/check-memory.js",
+    "optimize:memory": "node scripts/optimize-memory.js",
+    "test:memory": "node scripts/test-memory-optimization.js",
+    "verify:memory": "node scripts/verify-optimization.js"
   },
   "keywords": [
     "electron",

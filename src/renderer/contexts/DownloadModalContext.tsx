@@ -28,6 +28,7 @@ export interface DownloadStatusData {
   eta?: number;
   fileSize?: number;
   downloadedSize?: number;
+  searchCount?: number; // Number of torrents found so far
   torrentInfo?: {
     title: string;
     seeders: number;
@@ -51,6 +52,8 @@ interface DownloadModalContextType {
   closeModal: () => void;
   updateStep: (stepId: string, status: 'pending' | 'active' | 'completed' | 'error', description?: string) => void;
   updateProgress: (progress: number, downloadSpeed?: number, eta?: number, downloadedSize?: number, fileSize?: number) => void;
+  updateSearchCount: (count: number) => void;
+  updateCurrentStep: (stepId: string) => void;
 }
 
 const DownloadModalContext = createContext<DownloadModalContextType | undefined>(undefined);
@@ -113,6 +116,26 @@ export const DownloadModalProvider: React.FC<DownloadModalProviderProps> = ({ ch
     });
   }, []);
 
+  const updateSearchCount = useCallback((count: number) => {
+    setDownloadData(prevData => {
+      if (!prevData) return null;
+      return {
+        ...prevData,
+        searchCount: count
+      };
+    });
+  }, []);
+
+  const updateCurrentStep = useCallback((stepId: string) => {
+    setDownloadData(prevData => {
+      if (!prevData) return null;
+      return {
+        ...prevData,
+        currentStep: stepId
+      };
+    });
+  }, []);
+
   return (
     <DownloadModalContext.Provider value={{
       isOpen,
@@ -120,7 +143,9 @@ export const DownloadModalProvider: React.FC<DownloadModalProviderProps> = ({ ch
       openModal,
       closeModal,
       updateStep,
-      updateProgress
+      updateProgress,
+      updateSearchCount,
+      updateCurrentStep
     }}>
       {children}
     </DownloadModalContext.Provider>

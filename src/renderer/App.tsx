@@ -1,10 +1,11 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, QueryCache } from '@tanstack/react-query';
 import AppLayout from './components/layout/AppLayout';
 import NotificationManager from './components/downloads/NotificationManager';
 import { DownloadModalProvider, useDownloadModal } from './contexts/DownloadModalContext';
 import DownloadStatusModal from './components/downloads/DownloadStatusModal';
+import { useDownloadProgress } from './hooks/useDownloadProgress';
 import HomePage from './pages/HomePage';
 import MoviesPage from './pages/MoviesPage';
 import TVShowsPage from './pages/TVShowsPage';
@@ -14,23 +15,33 @@ import LibraryPage from './pages/LibraryPage';
 import DownloadsPage from './pages/DownloadsPage';
 import SearchPage from './pages/SearchPage';
 
-// Create a client
+// Create a client with memory optimization
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 2,
+      staleTime: 2 * 60 * 1000, // 2 minutes (reduced from 5)
+      cacheTime: 5 * 60 * 1000, // 5 minutes cache time
+      retry: 1, // Reduced retries
       refetchOnWindowFocus: false,
     },
     mutations: {
       retry: 1,
     },
   },
+  // Add garbage collection
+  queryCache: new QueryCache({
+    onError: (error) => {
+      console.error('Query error:', error);
+    },
+  }),
 });
 
 // Component that renders the global download modal
 const GlobalDownloadModal: React.FC = () => {
   const { isOpen, downloadData, closeModal } = useDownloadModal();
+  
+  // Start polling for download progress when modal is open and has a jobId
+  useDownloadProgress(downloadData?.jobId || null);
 
   console.log('🎬 GlobalDownloadModal: Rendering with isOpen:', isOpen, 'downloadData:', downloadData);
 
@@ -56,6 +67,7 @@ const GlobalDownloadModal: React.FC = () => {
       eta={downloadData.eta}
       fileSize={downloadData.fileSize}
       downloadedSize={downloadData.downloadedSize}
+      searchCount={downloadData.searchCount}
       onClose={closeModal}
       onViewDownloads={handleViewDownloads}
     />

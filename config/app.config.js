@@ -59,8 +59,8 @@ module.exports = {
 
   // Torrent Configuration
   torrent: {
-    // Client Detection Priority
-    clientPriority: ['transmission', 'qbittorrent'],
+    // Client Detection Priority - Only use Transmission for now
+    clientPriority: ['transmission'],
     
     // Transmission Settings
     transmission: {

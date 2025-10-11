@@ -426,24 +426,8 @@ class TorrentClientDetector {
         catch (error) {
             logger_1.default.debug('Transmission not detected:', error);
         }
-        // Check for qBittorrent
-        try {
-            const qbClient = new QBittorrentClient({
-                type: 'qbittorrent',
-                host: 'localhost',
-                port: this.DEFAULT_PORTS.qbittorrent,
-                username: 'admin',
-                password: 'adminadmin',
-                downloadPath: ''
-            });
-            if (await qbClient.isConnected()) {
-                clients.push({ type: 'qbittorrent', port: this.DEFAULT_PORTS.qbittorrent });
-                logger_1.default.info('Detected running qBittorrent client');
-            }
-        }
-        catch (error) {
-            logger_1.default.debug('qBittorrent not detected:', error);
-        }
+        // Skip qBittorrent detection - not needed for now
+        // This prevents connection errors and simplifies the setup
         return clients;
     }
     static createClient(clientInfo, downloadPath) {

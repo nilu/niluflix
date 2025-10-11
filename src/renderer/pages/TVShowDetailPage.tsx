@@ -20,79 +20,21 @@ const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: 
   const handleEpisodeDownload = async (episodeNumber: number, episodeName: string) => {
     console.log('🎬 Episode download clicked!', { tvId, seasonNumber, episodeNumber });
     
-    // Open modal immediately
-    const initialData = {
-      jobId: `temp_${Date.now()}`,
-      movie: {
-        id: tvId,
-        title: `${showName} S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')} - ${episodeName}`,
-        poster_path: '', // We'll get this from the show data
-        release_date: '' // We'll get this from the episode data
-      },
-      episode: {
-        tvId,
-        seasonNumber,
-        episodeNumber,
-        showName
-      },
-      steps: [
-        {
-          id: 'episode_details',
-          title: 'Getting episode details',
-          description: `Found "${episodeName}" (S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')})`,
-          status: 'completed' as const
-        },
-        {
-          id: 'torrent_search',
-          title: 'Searching for torrents',
-          description: 'Finding available downloads...',
-          status: 'active' as const
-        },
-        {
-          id: 'queue_add',
-          title: 'Adding to download queue',
-          description: 'Preparing download...',
-          status: 'pending' as const
-        },
-        {
-          id: 'torrent_start',
-          title: 'Starting torrent download',
-          description: 'Connecting to peers...',
-          status: 'pending' as const
-        },
-        {
-          id: 'downloading',
-          title: 'Downloading',
-          description: 'Download in progress...',
-          status: 'pending' as const
-        },
-        {
-          id: 'organizing',
-          title: 'Organizing files',
-          description: 'Moving files to organized structure',
-          status: 'pending' as const
-        },
-        {
-          id: 'completed',
-          title: 'Download complete',
-          description: 'Ready to watch!',
-          status: 'pending' as const
-        }
-      ],
-      currentStep: 'torrent_search',
-      progress: 0
-    };
-    
-    console.log('🎬 TVShowDetailPage: Opening modal immediately');
-    openModal(initialData);
-    
+    // Start the download and wait for server response
     try {
-      await downloadEpisode.mutateAsync({
+      const result = await downloadEpisode.mutateAsync({
         tvId,
         seasonNumber,
         episodeNumber,
         quality: 'auto'
       });
+      console.log('🎬 TVShowDetailPage: Download result', result);
+      
+      // Open modal with real data from server
+      if (result && result.data) {
+        console.log('🎬 TVShowDetailPage: Opening modal with API data');
+        openModal(result.data);
+      }
     } catch (error) {
       console.error('Episode download failed:', error);
     }

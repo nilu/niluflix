@@ -21,74 +21,14 @@ const MovieDetailPage: React.FC = () => {
     if (movie) {
       console.log('🎬 MovieDetailPage: Starting download for', movie.title);
       
-      // Open modal immediately
-      const initialData = {
-        jobId: `temp_${Date.now()}`,
-        movie: {
-          id: movie.id,
-          title: movie.title,
-          poster_path: movie.poster_path,
-          release_date: movie.release_date
-        },
-        steps: [
-          {
-            id: 'movie_details',
-            title: 'Getting movie details',
-            description: `Found "${movie.title}" (${new Date(movie.release_date).getFullYear()})`,
-            status: 'completed' as const
-          },
-          {
-            id: 'torrent_search',
-            title: 'Searching for torrents',
-            description: 'Finding available downloads...',
-            status: 'active' as const
-          },
-          {
-            id: 'queue_add',
-            title: 'Adding to download queue',
-            description: 'Preparing download...',
-            status: 'pending' as const
-          },
-          {
-            id: 'torrent_start',
-            title: 'Starting torrent download',
-            description: 'Connecting to peers...',
-            status: 'pending' as const
-          },
-          {
-            id: 'downloading',
-            title: 'Downloading',
-            description: 'Download in progress...',
-            status: 'pending' as const
-          },
-          {
-            id: 'organizing',
-            title: 'Organizing files',
-            description: 'Moving files to organized structure',
-            status: 'pending' as const
-          },
-          {
-            id: 'completed',
-            title: 'Download complete',
-            description: 'Ready to watch!',
-            status: 'pending' as const
-          }
-        ],
-        currentStep: 'torrent_search',
-        progress: 0
-      };
-      
-      console.log('🎬 MovieDetailPage: Opening modal immediately');
-      openModal(initialData);
-      
-      // Start the download
+      // Start the download and wait for server response
       try {
         const result = await downloadMovie.mutateAsync({ id: movie.id });
         console.log('🎬 MovieDetailPage: Download result', result);
         
-        // Update modal with real data
-        if (result && result.data && result.data.steps) {
-          console.log('🎬 MovieDetailPage: Updating modal with API data');
+        // Open modal with real data from server
+        if (result && result.data) {
+          console.log('🎬 MovieDetailPage: Opening modal with API data');
           openModal(result.data);
         }
       } catch (error) {
