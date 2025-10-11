@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { PlayIcon, PlusIcon, ArrowDownTrayIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
-import { useTVShowDetails, useDownloadTVShow, useTVShowSeason } from '../hooks/useTVShows';
+import { useTVShowDetails, useDownloadTVShow, useTVShowSeason, useDownloadEpisode } from '../hooks/useTVShows';
+import { useDownloadModal } from '../contexts/DownloadModalContext';
 
 // Season component to display individual season with episodes
 const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: string }> = ({ 
@@ -13,6 +14,89 @@ const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: 
   showName 
 }) => {
   const { data: season, isLoading, error } = useTVShowSeason(tvId, seasonNumber);
+  const downloadEpisode = useDownloadEpisode();
+  const { openModal } = useDownloadModal();
+
+  const handleEpisodeDownload = async (episodeNumber: number, episodeName: string) => {
+    console.log('🎬 Episode download clicked!', { tvId, seasonNumber, episodeNumber });
+    
+    // Open modal immediately
+    const initialData = {
+      jobId: `temp_${Date.now()}`,
+      movie: {
+        id: tvId,
+        title: `${showName} S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')} - ${episodeName}`,
+        poster_path: '', // We'll get this from the show data
+        release_date: '' // We'll get this from the episode data
+      },
+      episode: {
+        tvId,
+        seasonNumber,
+        episodeNumber,
+        showName
+      },
+      steps: [
+        {
+          id: 'episode_details',
+          title: 'Getting episode details',
+          description: `Found "${episodeName}" (S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')})`,
+          status: 'completed' as const
+        },
+        {
+          id: 'torrent_search',
+          title: 'Searching for torrents',
+          description: 'Finding available downloads...',
+          status: 'active' as const
+        },
+        {
+          id: 'queue_add',
+          title: 'Adding to download queue',
+          description: 'Preparing download...',
+          status: 'pending' as const
+        },
+        {
+          id: 'torrent_start',
+          title: 'Starting torrent download',
+          description: 'Connecting to peers...',
+          status: 'pending' as const
+        },
+        {
+          id: 'downloading',
+          title: 'Downloading',
+          description: 'Download in progress...',
+          status: 'pending' as const
+        },
+        {
+          id: 'organizing',
+          title: 'Organizing files',
+          description: 'Moving files to organized structure',
+          status: 'pending' as const
+        },
+        {
+          id: 'completed',
+          title: 'Download complete',
+          description: 'Ready to watch!',
+          status: 'pending' as const
+        }
+      ],
+      currentStep: 'torrent_search',
+      progress: 0
+    };
+    
+    console.log('🎬 TVShowDetailPage: Opening modal immediately');
+    openModal(initialData);
+    
+    try {
+      await downloadEpisode.mutateAsync({
+        tvId,
+        seasonNumber,
+        episodeNumber,
+        quality: 'auto'
+      });
+    } catch (error) {
+      console.error('Episode download failed:', error);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -85,8 +169,14 @@ const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: 
                 ★ {episode.vote_average ? episode.vote_average.toFixed(1) : 'N/A'}
               </span>
             </div>
-            <Button variant="ghost" size="sm" className="w-full">
-              Download
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full"
+              onClick={() => handleEpisodeDownload(episode.episode_number, episode.name || `Episode ${episode.episode_number}`)}
+              disabled={downloadEpisode.isPending}
+            >
+              {downloadEpisode.isPending ? 'Downloading...' : 'Download'}
             </Button>
           </div>
         )) : (

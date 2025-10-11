@@ -32,13 +32,18 @@ const queryClient = new QueryClient({
 const GlobalDownloadModal: React.FC = () => {
   const { isOpen, downloadData, closeModal } = useDownloadModal();
 
+  console.log('🎬 GlobalDownloadModal: Rendering with isOpen:', isOpen, 'downloadData:', downloadData);
+
   const handleViewDownloads = () => {
     closeModal();
     // Navigate to downloads page
     window.location.hash = '#/downloads';
   };
 
-  if (!downloadData) return null;
+  if (!downloadData) {
+    console.log('🎬 GlobalDownloadModal: No downloadData, returning null');
+    return null;
+  }
 
   return (
     <DownloadStatusModal

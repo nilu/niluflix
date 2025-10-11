@@ -15,6 +15,12 @@ export interface DownloadStatusData {
     poster_path: string;
     release_date?: string;
   };
+  episode?: {
+    tvId: number;
+    seasonNumber: number;
+    episodeNumber: number;
+    showName: string;
+  };
   steps: DownloadStatusStep[];
   currentStep: string;
   progress: number;
@@ -66,8 +72,10 @@ export const DownloadModalProvider: React.FC<DownloadModalProviderProps> = ({ ch
   const [downloadData, setDownloadData] = useState<DownloadStatusData | null>(null);
 
   const openModal = useCallback((data: DownloadStatusData) => {
+    console.log('🎬 DownloadModalContext: openModal called with data:', data);
     setDownloadData(data);
     setIsOpen(true);
+    console.log('🎬 DownloadModalContext: Modal state updated - isOpen: true');
   }, []);
 
   const closeModal = useCallback(() => {

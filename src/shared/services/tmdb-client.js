@@ -97,6 +97,9 @@ class TMDBClient {
         // Set in disk cache
         try {
             const filePath = path_1.default.join(this.cacheDir, `${key}.json`);
+            // Ensure directory exists
+            const dir = path_1.default.dirname(filePath);
+            await promises_1.default.mkdir(dir, { recursive: true });
             await promises_1.default.writeFile(filePath, JSON.stringify(entry), 'utf-8');
         }
         catch (error) {

@@ -20,7 +20,7 @@ interface ContentCardProps {
     download_status?: 'not_downloaded' | 'downloading' | 'downloaded' | 'failed';
     download_progress?: number;
   };
-  onDownload?: (contentId: number, contentType: string, options?: any) => void;
+  onDownload?: (contentId: number, contentType: string, options?: any) => Promise<any>;
   onPause?: (contentId: number) => void;
   onResume?: (contentId: number) => void;
   onCancel?: (contentId: number) => void;
@@ -39,6 +39,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
   const [isHovered, setIsHovered] = React.useState(false);
   const { openModal } = useDownloadModal();
   
+  console.log('🎬 ContentCard: Rendering for', content.title, 'with onDownload:', !!onDownload);
+  
   const releaseYear = content.release_date 
     ? new Date(content.release_date).getFullYear()
     : content.first_air_date 
@@ -46,8 +48,11 @@ const ContentCard: React.FC<ContentCardProps> = ({
     : '';
 
   const handleDownload = async (contentId: number, options?: any) => {
+    console.log('🎬 ContentCard: handleDownload called', { contentId, options, content: content.title });
+    
     if (onDownload) {
       try {
+        console.log('🎬 ContentCard: Opening modal with initial data');
         // Open modal immediately with initial state
         const initialData = {
           jobId: `temp_${Date.now()}`,
@@ -105,14 +110,17 @@ const ContentCard: React.FC<ContentCardProps> = ({
           progress: 0
         };
         
+        console.log('🎬 ContentCard: Calling openModal with data:', initialData);
         openModal(initialData);
+        console.log('🎬 ContentCard: Modal opened, calling onDownload');
         
         // Call the original download handler
         const result = await onDownload(contentId, content.type === 'tv' ? 'tv_show' : 'movie', options);
+        console.log('🎬 ContentCard: onDownload result:', result);
         
         // Update modal with real data from API response
-        if (result && typeof result === 'object' && 'data' in result && result.data && typeof result.data === 'object' && 'steps' in result.data) {
-          openModal(result.data as any);
+        if (result && (result as any).data && (result as any).data.steps) {
+          openModal((result as any).data);
         }
       } catch (error) {
         console.error('Download failed:', error);
