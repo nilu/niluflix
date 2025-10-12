@@ -8,10 +8,11 @@ import { useTVShowDetails, useDownloadTVShow, useTVShowSeason, useDownloadEpisod
 import { useDownloadModal } from '../contexts/DownloadModalContext';
 
 // Season component to display individual season with episodes
-const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: string }> = ({ 
+const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: string; showPosterPath?: string }> = ({ 
   tvId, 
   seasonNumber, 
-  showName 
+  showName,
+  showPosterPath
 }) => {
   const { data: season, isLoading, error } = useTVShowSeason(tvId, seasonNumber);
   const downloadEpisode = useDownloadEpisode();
@@ -26,7 +27,7 @@ const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: 
       movie: {
         id: tvId,
         title: `${showName} S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')} - ${episodeName}`,
-        poster_path: '', // We'll get this from the show data
+        poster_path: showPosterPath || '', // Use the show's poster path
         release_date: '' // We'll get this from the episode data
       },
       episode: {
@@ -299,6 +300,7 @@ const TVShowDetailPage: React.FC = () => {
             tvId={show.id}
             seasonNumber={season}
             showName={show.name || 'TV Show'}
+            showPosterPath={show.poster_path}
           />
         ))}
       </div>
