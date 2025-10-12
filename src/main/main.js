@@ -73,10 +73,18 @@ function stopApiServer() {
 }
 
 function createWindow() {
+  // Debug icon path - use different paths for dev vs production
+  const iconPath = process.env.NODE_ENV === 'production' 
+    ? path.join(process.resourcesPath, 'icon.icns')
+    : path.join(process.cwd(), 'build/icon.icns');
+  console.log('Icon path:', iconPath);
+  console.log('Icon exists:', require('fs').existsSync(iconPath));
+  
   // Create the browser window
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon: iconPath,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -100,6 +108,15 @@ function createWindow() {
   // Show when ready to prevent visual flash
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    // Try setting icon after window is ready - use relative path for built app
+    const iconPath = process.env.NODE_ENV === 'production' 
+      ? path.join(process.resourcesPath, 'icon.icns')
+      : '/Users/nilu/workspace/niluflix/build/icon.icns';
+    try {
+      mainWindow.setIcon(iconPath);
+    } catch (error) {
+      console.log('Icon setting failed:', error.message);
+    }
   });
 
   // Handle page load errors
