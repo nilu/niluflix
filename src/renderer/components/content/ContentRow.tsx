@@ -11,6 +11,7 @@ interface ContentRowProps {
   category: 'trending' | 'popular' | 'downloaded' | 'search' | 'genre';
   query?: string;
   genreId?: number;
+  navigationState?: any;
 }
 
 const ContentRow: React.FC<ContentRowProps> = ({
@@ -19,6 +20,7 @@ const ContentRow: React.FC<ContentRowProps> = ({
   category,
   query,
   genreId,
+  navigationState,
 }) => {
   // Download mutations
   const downloadMovie = useDownloadMovie();
@@ -260,6 +262,7 @@ const ContentRow: React.FC<ContentRowProps> = ({
                 onResume={handleResume}
                 onCancel={handleCancel}
                 onRetry={handleRetry}
+                navigationState={navigationState}
               />
             </motion.div>
           ))}

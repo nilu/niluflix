@@ -25,6 +25,7 @@ interface ContentCardProps {
   onResume?: (contentId: number) => void;
   onCancel?: (contentId: number) => void;
   onRetry?: (contentId: number) => void;
+  navigationState?: any;
 }
 
 const ContentCard: React.FC<ContentCardProps> = ({ 
@@ -33,7 +34,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
   onPause, 
   onResume, 
   onCancel, 
-  onRetry 
+  onRetry,
+  navigationState
 }) => {
   
   const [isHovered, setIsHovered] = React.useState(false);
@@ -138,7 +140,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
       whileHover={{ scale: 1.05 }}
       transition={{ duration: 0.2 }}
     >
-      <Link to={`/${content.type}/${content.id}`} className="block">
+      <Link to={`/${content.type}/${content.id}`} state={navigationState} className="block">
         <Card className="overflow-hidden p-0 cursor-pointer">
           {/* Poster */}
           <div className="relative aspect-[2/3] bg-gray-700 overflow-hidden">

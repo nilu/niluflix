@@ -1,22 +1,40 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { PlayIcon, PlusIcon, ArrowDownTrayIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { PlayIcon, PlusIcon, ArrowDownTrayIcon, ArrowLeftIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
-import { useTVShowDetails, useDownloadTVShow, useTVShowSeason, useDownloadEpisode } from '../hooks/useTVShows';
+import FilterToggle from '../components/ui/FilterToggle';
+import { useTVShowDetails, useDownloadTVShow, useTVShowSeason, useDownloadEpisode, useTVShowEpisodes } from '../hooks/useTVShows';
 import { useDownloadModal } from '../contexts/DownloadModalContext';
 
 // Season component to display individual season with episodes
-const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: string; showPosterPath?: string }> = ({ 
+const SeasonComponent: React.FC<{ 
+  tvId: number; 
+  seasonNumber: number; 
+  showName: string; 
+  showPosterPath?: string;
+  showDownloadedOnly?: boolean;
+}> = ({ 
   tvId, 
   seasonNumber, 
   showName,
-  showPosterPath
+  showPosterPath,
+  showDownloadedOnly = false
 }) => {
   const { data: season, isLoading, error } = useTVShowSeason(tvId, seasonNumber);
+  const { data: downloadedEpisodes } = useTVShowEpisodes(tvId, seasonNumber, true);
   const downloadEpisode = useDownloadEpisode();
   const { openModal } = useDownloadModal();
+
+  // Debug logging
+  console.log('🎬 SeasonComponent Debug:', {
+    tvId,
+    seasonNumber,
+    showDownloadedOnly,
+    downloadedEpisodes: downloadedEpisodes?.episodes?.length || 0,
+    seasonEpisodes: season?.episodes?.length || 0
+  });
 
   const handleEpisodeDownload = async (episodeNumber: number, episodeName: string) => {
     console.log('🎬 Episode download clicked!', { tvId, seasonNumber, episodeNumber });
@@ -138,33 +156,60 @@ const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: 
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {season.episodes && season.episodes.length > 0 ? season.episodes.map((episode: any) => (
-          <div key={episode.episode_number} className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-white">
-                Episode {episode.episode_number}
-              </span>
-              <span className="text-xs text-gray-400">
-                {episode.runtime ? `${episode.runtime} min` : 'N/A'}
-              </span>
-            </div>
-            <h4 className="text-sm text-gray-300 mb-2 line-clamp-2">
-              {episode.name || `Episode ${episode.episode_number}`}
-            </h4>
-            <p className="text-xs text-gray-400 mb-3 line-clamp-3">
-              {episode.overview || 'No description available'}
-            </p>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-500">
-                {episode.air_date ? new Date(episode.air_date).toLocaleDateString() : 'TBA'}
-              </span>
-              <span className="text-xs text-yellow-400">
-                ★ {episode.vote_average ? episode.vote_average.toFixed(1) : 'N/A'}
-              </span>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+        {(() => {
+          // Get episodes to display
+          let episodesToShow = season.episodes || [];
+          
+          // If showing downloaded only, filter episodes
+          if (showDownloadedOnly && downloadedEpisodes?.episodes) {
+            const downloadedEpisodeNumbers = new Set(
+              downloadedEpisodes.episodes.map((ep: any) => ep.episodeNumber)
+            );
+            episodesToShow = episodesToShow.filter((episode: any) => 
+              downloadedEpisodeNumbers.has(episode.episode_number)
+            );
+          }
+          
+          return episodesToShow.length > 0 ? episodesToShow.map((episode: any) => {
+            // Check if this episode is downloaded
+            const isDownloaded = downloadedEpisodes?.episodes?.some(
+              (downloadedEp: any) => downloadedEp.episodeNumber === episode.episode_number
+            );
+            
+            return (
+              <div key={episode.episode_number} className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-white">
+                    Episode {episode.episode_number}
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    {isDownloaded && (
+                      <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">
+                        Downloaded
+                      </span>
+                    )}
+                    <span className="text-xs text-gray-400">
+                      {episode.runtime ? `${episode.runtime} min` : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+                <h4 className="text-sm text-gray-300 mb-2 line-clamp-2">
+                  {episode.name || `Episode ${episode.episode_number}`}
+                </h4>
+                <p className="text-xs text-gray-400 mb-3 line-clamp-3">
+                  {episode.overview || 'No description available'}
+                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-gray-500">
+                    {episode.air_date ? new Date(episode.air_date).toLocaleDateString() : 'TBA'}
+                  </span>
+                  <span className="text-xs text-yellow-400">
+                    ★ {episode.vote_average ? episode.vote_average.toFixed(1) : 'N/A'}
+                  </span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
               className="w-full"
               onClick={() => handleEpisodeDownload(episode.episode_number, episode.name || `Episode ${episode.episode_number}`)}
               disabled={downloadEpisode.isPending}
@@ -172,11 +217,15 @@ const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: 
               {downloadEpisode.isPending ? 'Downloading...' : 'Download'}
             </Button>
           </div>
-        )) : (
-          <div className="col-span-full text-center py-8">
-            <p className="text-gray-400">No episodes available for this season</p>
-          </div>
-        )}
+            );
+          }) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-gray-400">
+                {showDownloadedOnly ? 'No downloaded episodes available for this season.' : 'No episodes available for this season.'}
+              </p>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
@@ -186,9 +235,28 @@ const TVShowDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const tvId = id ? parseInt(id) : 0;
   const navigate = useNavigate();
+  const location = useLocation();
   
   const { data: show, isLoading, error } = useTVShowDetails(tvId);
   const downloadTVShow = useDownloadTVShow();
+  
+  // Filter state
+  const [showDownloadedOnly, setShowDownloadedOnly] = useState(false);
+  
+  // Set default filter based on navigation source
+  useEffect(() => {
+    // If coming from library page, default to showing downloaded episodes only
+    if (location.state?.fromLibrary) {
+      setShowDownloadedOnly(true);
+    }
+  }, [location.state]);
+
+  // Debug logging
+  console.log('🎬 TVShowDetailPage Debug:', {
+    tvId,
+    showDownloadedOnly,
+    fromLibrary: location.state?.fromLibrary
+  });
 
   const handleDownload = () => {
     if (show) {
@@ -293,7 +361,21 @@ const TVShowDetailPage: React.FC = () => {
 
       {/* Seasons */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-white">Seasons</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-white">Seasons</h2>
+          <div className="flex items-center space-x-4">
+            <FilterToggle
+              label="Show downloaded episodes only"
+              checked={showDownloadedOnly}
+              onChange={setShowDownloadedOnly}
+              className="flex items-center space-x-2"
+            />
+            <div className="flex items-center space-x-2 text-sm text-gray-400">
+              <FunnelIcon className="w-4 h-4" />
+              <span>Filter</span>
+            </div>
+          </div>
+        </div>
         {Array.from({ length: show.number_of_seasons || 0 }, (_, i) => i + 1).map((season) => (
           <SeasonComponent
             key={season}
@@ -301,6 +383,7 @@ const TVShowDetailPage: React.FC = () => {
             seasonNumber={season}
             showName={show.name || 'TV Show'}
             showPosterPath={show.poster_path}
+            showDownloadedOnly={showDownloadedOnly}
           />
         ))}
       </div>

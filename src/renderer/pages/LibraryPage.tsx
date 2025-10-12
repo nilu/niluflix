@@ -73,6 +73,7 @@ const LibraryPage: React.FC = () => {
           title="Downloaded TV Shows"
           type="tv"
           category="downloaded"
+          navigationState={{ fromLibrary: true }}
         />
       </div>
     </div>
