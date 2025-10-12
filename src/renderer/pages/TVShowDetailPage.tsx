@@ -20,7 +20,55 @@ const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: 
   const handleEpisodeDownload = async (episodeNumber: number, episodeName: string) => {
     console.log('🎬 Episode download clicked!', { tvId, seasonNumber, episodeNumber });
     
-    // Start the download and wait for server response
+    // Open modal immediately with step 1
+    const initialData = {
+      jobId: `temp_${Date.now()}`,
+      movie: {
+        id: tvId,
+        title: `${showName} S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')} - ${episodeName}`,
+        poster_path: '', // We'll get this from the show data
+        release_date: '' // We'll get this from the episode data
+      },
+      episode: {
+        tvId,
+        seasonNumber,
+        episodeNumber,
+        showName
+      },
+      steps: [
+        {
+          id: 'episode_details',
+          title: 'Getting episode details',
+          description: `Found "${episodeName}" (S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')})`,
+          status: 'active' as const
+        },
+        {
+          id: 'torrent_search',
+          title: 'Searching for torrents',
+          description: 'Finding available downloads...',
+          status: 'pending' as const
+        },
+        {
+          id: 'queue_add',
+          title: 'Adding to download queue',
+          description: 'Preparing download...',
+          status: 'pending' as const
+        },
+        {
+          id: 'torrent_start',
+          title: 'Starting torrent download',
+          description: 'Connecting to peers...',
+          status: 'pending' as const
+        }
+      ],
+      currentStep: 'episode_details',
+      progress: 0
+    };
+    
+    console.log('🎬 TVShowDetailPage: Opening modal immediately');
+    openModal(initialData);
+    
+    // Start the download in the background
     try {
       const result = await downloadEpisode.mutateAsync({
         tvId,
@@ -30,13 +78,15 @@ const SeasonComponent: React.FC<{ tvId: number; seasonNumber: number; showName: 
       });
       console.log('🎬 TVShowDetailPage: Download result', result);
       
-      // Open modal with real data from server
+      // Update modal with real data from server (including real jobId)
       if (result && result.data) {
-        console.log('🎬 TVShowDetailPage: Opening modal with API data');
+        console.log('🎬 TVShowDetailPage: Updating modal with real jobId');
         openModal(result.data);
       }
     } catch (error) {
       console.error('Episode download failed:', error);
+      // Update modal to show error
+      // TODO: Add error handling to modal
     }
   };
 

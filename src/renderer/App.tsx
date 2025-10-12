@@ -5,7 +5,7 @@ import AppLayout from './components/layout/AppLayout';
 import NotificationManager from './components/downloads/NotificationManager';
 import { DownloadModalProvider, useDownloadModal } from './contexts/DownloadModalContext';
 import DownloadStatusModal from './components/downloads/DownloadStatusModal';
-import { useDownloadProgress } from './hooks/useDownloadProgress';
+import { useDownloadProgressSSE } from './hooks/useDownloadProgressSSE';
 import HomePage from './pages/HomePage';
 import MoviesPage from './pages/MoviesPage';
 import TVShowsPage from './pages/TVShowsPage';
@@ -41,7 +41,7 @@ const GlobalDownloadModal: React.FC = () => {
   const { isOpen, downloadData, closeModal } = useDownloadModal();
   
   // Start polling for download progress when modal is open and has a jobId
-  useDownloadProgress(downloadData?.jobId || null);
+  useDownloadProgressSSE(downloadData?.jobId || null);
 
   console.log('🎬 GlobalDownloadModal: Rendering with isOpen:', isOpen, 'downloadData:', downloadData);
 

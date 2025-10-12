@@ -248,6 +248,7 @@ const ContentRow: React.FC<ContentRowProps> = ({
                   id: item.id,
                   title: item.title || item.name,
                   poster_path: item.poster_path,
+                  poster_url: item.poster_url,
                   vote_average: item.vote_average,
                   release_date: item.release_date || item.first_air_date,
                   type: item.type || (item.name ? 'tv' : 'movie'),

@@ -21,18 +21,62 @@ const MovieDetailPage: React.FC = () => {
     if (movie) {
       console.log('🎬 MovieDetailPage: Starting download for', movie.title);
       
-      // Start the download and wait for server response
+      // Open modal immediately with step 1
+      const initialData = {
+        jobId: `temp_${Date.now()}`,
+        movie: {
+          id: movie.id,
+          title: movie.title,
+          poster_path: movie.poster_path,
+          release_date: movie.release_date
+        },
+        steps: [
+          {
+            id: 'movie_details',
+            title: 'Getting movie details',
+            description: `Found "${movie.title}" (${new Date(movie.release_date).getFullYear()})`,
+            status: 'active' as const
+          },
+          {
+            id: 'torrent_search',
+            title: 'Searching for torrents',
+            description: 'Finding available downloads...',
+            status: 'pending' as const
+          },
+          {
+            id: 'queue_add',
+            title: 'Adding to download queue',
+            description: 'Preparing download...',
+            status: 'pending' as const
+          },
+          {
+            id: 'torrent_start',
+            title: 'Starting torrent download',
+            description: 'Connecting to peers...',
+            status: 'pending' as const
+          }
+        ],
+        currentStep: 'movie_details',
+        progress: 0
+      };
+      
+      console.log('🎬 MovieDetailPage: Opening modal immediately');
+      openModal(initialData);
+      
+      // Start the download in the background
       try {
         const result = await downloadMovie.mutateAsync({ id: movie.id });
         console.log('🎬 MovieDetailPage: Download result', result);
         
-        // Open modal with real data from server
+        // Update modal with real data from server (including real jobId)
         if (result && result.data) {
-          console.log('🎬 MovieDetailPage: Opening modal with API data');
+          console.log('🎬 MovieDetailPage: Updating modal with real jobId');
           openModal(result.data);
         }
       } catch (error) {
         console.error('🎬 MovieDetailPage: Download failed', error);
+        // Update modal to show error
+        // TODO: Add error handling to modal
       }
     }
   };

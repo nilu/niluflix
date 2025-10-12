@@ -54,6 +54,7 @@ interface DownloadModalContextType {
   updateProgress: (progress: number, downloadSpeed?: number, eta?: number, downloadedSize?: number, fileSize?: number) => void;
   updateSearchCount: (count: number) => void;
   updateCurrentStep: (stepId: string) => void;
+  updateStepDescription: (stepId: string, description: string) => void;
 }
 
 const DownloadModalContext = createContext<DownloadModalContextType | undefined>(undefined);
@@ -136,6 +137,18 @@ export const DownloadModalProvider: React.FC<DownloadModalProviderProps> = ({ ch
     });
   }, []);
 
+  const updateStepDescription = useCallback((stepId: string, description: string) => {
+    setDownloadData(prevData => {
+      if (!prevData) return null;
+      return {
+        ...prevData,
+        steps: prevData.steps.map(step =>
+          step.id === stepId ? { ...step, description } : step
+        )
+      };
+    });
+  }, []);
+
   return (
     <DownloadModalContext.Provider value={{
       isOpen,
@@ -145,7 +158,8 @@ export const DownloadModalProvider: React.FC<DownloadModalProviderProps> = ({ ch
       updateStep,
       updateProgress,
       updateSearchCount,
-      updateCurrentStep
+      updateCurrentStep,
+      updateStepDescription
     }}>
       {children}
     </DownloadModalContext.Provider>
