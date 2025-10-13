@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
@@ -22,6 +23,7 @@ module.exports = (env, argv) => {
       fallback: {
         "path": false,
         "fs": false,
+        "global": false,
       },
     },
 
@@ -71,6 +73,12 @@ module.exports = (env, argv) => {
       new HtmlWebpackPlugin({
         template: './src/renderer/index.html',
         filename: 'index.html',
+      }),
+      new webpack.DefinePlugin({
+        global: 'globalThis',
+      }),
+      new webpack.ProvidePlugin({
+        global: 'globalThis',
       }),
     ],
 

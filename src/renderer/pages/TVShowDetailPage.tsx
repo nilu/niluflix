@@ -272,13 +272,26 @@ const SeasonComponent: React.FC<{
                   <Button 
                     size="sm" 
                     className="w-full bg-red-600 hover:bg-red-700 text-white font-medium transition-all duration-200 flex items-center justify-center space-x-2 hover:scale-105 active:scale-95"
-                    onClick={() => {
-                      // Play functionality for downloaded episodes
-                      console.log('Playing episode:', episode.name);
-                      // TODO: Implement actual media player integration
-                      // For now, show a more polished message
-                      const playMessage = `🎬 Ready to play: ${episode.name}\n\nEpisode ${episode.episode_number} of ${showName}\n\nMedia player integration coming soon!`;
-                      alert(playMessage);
+                    onClick={async () => {
+                      if (!episode.filePath) {
+                        alert('Episode file not found. Please re-download this episode.');
+                        return;
+                      }
+                      
+                      // Import video player service dynamically
+                      const { VideoPlayerService } = await import('../services/videoPlayer');
+                      
+                      console.log('Playing episode:', episode.name, 'at', episode.filePath);
+                      
+                      try {
+                        const result = await VideoPlayerService.playVideo(episode.filePath);
+                        if (!result.success) {
+                          alert(`Failed to play episode: ${VideoPlayerService.getErrorMessage(result.error)}`);
+                        }
+                      } catch (error) {
+                        console.error('Play error:', error);
+                        alert(`Failed to play episode: ${VideoPlayerService.getErrorMessage(error)}`);
+                      }
                     }}
                   >
                     <PlayIcon className="w-4 h-4" />

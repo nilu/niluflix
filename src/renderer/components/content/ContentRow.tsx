@@ -254,8 +254,9 @@ const ContentRow: React.FC<ContentRowProps> = ({
                   vote_average: item.vote_average,
                   release_date: item.release_date || item.first_air_date,
                   type: item.type || (item.name ? 'tv' : 'movie'),
-                  download_status: item.download_status || 'not_downloaded',
+                  download_status: item.download_status || item.downloadStatus || 'not_downloaded',
                   download_progress: item.download_progress,
+                  filePath: item.filePath || item.file_path,
                 }}
                 onDownload={(contentId, options) => handleDownload(contentId, item.type || (item.name ? 'tv_show' : 'movie'), options)}
                 onPause={handlePause}

@@ -1,6 +1,7 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, shell } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
+const fs = require('fs');
 
 // Import memory manager (will be available after TypeScript compilation)
 // const MemoryManager = require('../shared/services/memory-manager').default;
@@ -10,6 +11,27 @@ const { spawn } = require('child_process');
 
 // Global variable to store the API server process
 let apiServerProcess = null;
+
+// Set up IPC handlers (only once)
+ipcMain.handle('play-video', async (event, filePath) => {
+  try {
+    console.log('🎬 Attempting to play video:', filePath);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      console.error('❌ Video file not found:', filePath);
+      return { success: false, error: 'File not found' };
+    }
+    
+    // Open with system default player
+    await shell.openPath(filePath);
+    console.log('✅ Video opened successfully');
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Failed to play video:', error);
+    return { success: false, error: error.message };
+  }
+});
 
 // Initialize memory manager (commented out until TypeScript compilation)
 // const memoryManager = MemoryManager.getInstance();
@@ -90,6 +112,7 @@ function createWindow() {
       contextIsolation: true,
       enableRemoteModule: false,
       webSecurity: false, // Disable web security for development
+      preload: path.join(__dirname, 'preload.js'),
     },
     titleBarStyle: 'hiddenInset',
     show: false, // Don't show until ready-to-show

@@ -19,6 +19,7 @@ interface ContentCardProps {
     type: 'movie' | 'tv';
     download_status?: 'not_downloaded' | 'downloading' | 'downloaded' | 'failed';
     download_progress?: number;
+    filePath?: string;
   };
   onDownload?: (contentId: number, contentType: string, options?: any) => Promise<any>;
   onPause?: (contentId: number) => void;
@@ -224,13 +225,35 @@ const ContentCard: React.FC<ContentCardProps> = ({
         {/* Show Play button in library context for movies only, Download button elsewhere */}
         {navigationState?.fromLibrary && content.type === 'movie' ? (
           <button
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
               e.stopPropagation();
-              // Play functionality - could be extended to open media player
-              console.log('Playing:', content.title);
-              // For now, just show an alert - this could be extended to open a media player
-              alert(`Playing ${content.title} - Media player integration coming soon!`);
+              
+              // Debug: Log the content object to see what fields are available
+              console.log('🎬 ContentCard: Full content object:', content);
+              console.log('🎬 ContentCard: filePath field:', content.filePath);
+              console.log('🎬 ContentCard: downloadStatus:', content.download_status);
+              
+              // Import video player service dynamically to avoid issues
+              const { VideoPlayerService } = await import('../../services/videoPlayer');
+              
+              if (!content.filePath) {
+                console.error('❌ ContentCard: No filePath found in content:', content);
+                alert('Video file not found. Please re-download this content.');
+                return;
+              }
+              
+              console.log('🎬 ContentCard: Playing:', content.title, 'at', content.filePath);
+              
+              try {
+                const result = await VideoPlayerService.playVideo(content.filePath);
+                if (!result.success) {
+                  alert(`Failed to play video: ${VideoPlayerService.getErrorMessage(result.error)}`);
+                }
+              } catch (error) {
+                console.error('Play error:', error);
+                alert(`Failed to play video: ${VideoPlayerService.getErrorMessage(error)}`);
+              }
             }}
             className="w-full py-1.5 px-3 rounded text-xs font-medium bg-red-600 hover:bg-red-700 text-white transition-colors flex items-center justify-center space-x-1"
           >

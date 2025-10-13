@@ -157,7 +157,31 @@ const MovieDetailPage: React.FC = () => {
 
       {/* Action Buttons */}
       <div className="flex items-center space-x-4">
-        <Button size="lg" className="flex items-center space-x-2">
+        <Button 
+          size="lg" 
+          className="flex items-center space-x-2"
+          onClick={async () => {
+            if (!movie.filePath) {
+              alert('Video file not found. Please download this movie first.');
+              return;
+            }
+            
+            // Import video player service dynamically
+            const { VideoPlayerService } = await import('../services/videoPlayer');
+            
+            console.log('Playing movie:', movie.title, 'at', movie.filePath);
+            
+            try {
+              const result = await VideoPlayerService.playVideo(movie.filePath);
+              if (!result.success) {
+                alert(`Failed to play video: ${VideoPlayerService.getErrorMessage(result.error)}`);
+              }
+            } catch (error) {
+              console.error('Play error:', error);
+              alert(`Failed to play video: ${VideoPlayerService.getErrorMessage(error)}`);
+            }
+          }}
+        >
           <PlayIcon className="w-5 h-5" />
           <span>Play</span>
         </Button>
