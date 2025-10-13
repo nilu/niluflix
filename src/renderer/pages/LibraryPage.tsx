@@ -67,6 +67,7 @@ const LibraryPage: React.FC = () => {
           title="Downloaded Movies"
           type="movie"
           category="downloaded"
+          navigationState={{ fromLibrary: true }}
         />
         
         <ContentRow

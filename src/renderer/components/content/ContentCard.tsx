@@ -134,7 +134,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
 
   return (
     <motion.div
-      className="group relative"
+      className="group relative w-40"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       whileHover={{ scale: 1.05 }}
@@ -143,7 +143,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
       <Link to={`/${content.type}/${content.id}`} state={navigationState} className="block">
         <Card className="overflow-hidden p-0 cursor-pointer">
           {/* Poster */}
-          <div className="relative aspect-[2/3] bg-gray-700 overflow-hidden">
+          <div className="relative aspect-[3/4] bg-gray-700 overflow-hidden">
             <img
               src={content.poster_url || `https://image.tmdb.org/t/p/w300${content.poster_path}`}
               alt={content.title}
@@ -159,19 +159,19 @@ const ContentCard: React.FC<ContentCardProps> = ({
             
             {/* Action Buttons */}
             <motion.div
-              className="absolute inset-0 flex items-center justify-center space-x-2"
+              className="absolute inset-0 flex items-center justify-center space-x-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: isHovered ? 1 : 0 }}
               transition={{ duration: 0.2 }}
             >
-              <Button size="sm" className="flex items-center space-x-1">
-                <PlayIcon className="w-4 h-4" />
-                <span>Play</span>
+              <Button size="sm" className="flex items-center space-x-1 text-xs px-2 py-1">
+                <PlayIcon className="w-3 h-3" />
+                <span className="text-xs">Play</span>
               </Button>
               
-              <Button variant="secondary" size="sm" className="flex items-center space-x-1">
-                <PlusIcon className="w-4 h-4" />
-                <span>Add</span>
+              <Button variant="secondary" size="sm" className="flex items-center space-x-1 text-xs px-2 py-1">
+                <PlusIcon className="w-3 h-3" />
+                <span className="text-xs">Add</span>
               </Button>
             </motion.div>
             
@@ -203,40 +203,63 @@ const ContentCard: React.FC<ContentCardProps> = ({
           </div>
           
           {/* Content Info */}
-          <div className="p-3">
-            <h3 className="font-semibold text-white text-sm mb-1 line-clamp-2 hover:text-red-400 transition-colors">
+          <div className="p-2">
+            <h3 className="font-semibold text-white text-xs mb-1 line-clamp-2 hover:text-red-400 transition-colors">
               {content.title}
             </h3>
             
             <div className="flex items-center justify-between text-xs text-gray-400">
-              <span>{releaseYear}</span>
+              <span className="text-xs">{releaseYear}</span>
               <div className="flex items-center space-x-1">
-                <span className="text-yellow-400">★</span>
-                <span>{content.vote_average?.toFixed(1) || 'N/A'}</span>
+                <span className="text-yellow-400 text-xs">★</span>
+                <span className="text-xs">{content.vote_average?.toFixed(1) || 'N/A'}</span>
               </div>
             </div>
           </div>
         </Card>
       </Link>
       
-      {/* Download Button - Outside the Link to prevent navigation conflicts */}
-      <div className="mt-2 px-3">
-        <DownloadButton
-          contentId={content.id}
-          contentType={content.type === 'tv' ? 'tv_show' : 'movie'}
-          title={content.title}
-          downloadStatus={content.download_status}
-          progress={content.download_progress}
-          onDownload={handleDownload}
-          onPause={onPause}
-          onResume={onResume}
-          onCancel={onCancel}
-          onRetry={onRetry}
-          size="sm"
-          variant="ghost"
-          className="w-full"
-          showProgress={true}
-        />
+      {/* Action Button - Outside the Link to prevent navigation conflicts */}
+      <div className="mt-1 px-2">
+        {/* Show Play button in library context for movies only, Download button elsewhere */}
+        {navigationState?.fromLibrary && content.type === 'movie' ? (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // Play functionality - could be extended to open media player
+              console.log('Playing:', content.title);
+              // For now, just show an alert - this could be extended to open a media player
+              alert(`Playing ${content.title} - Media player integration coming soon!`);
+            }}
+            className="w-full py-1.5 px-3 rounded text-xs font-medium bg-red-600 hover:bg-red-700 text-white transition-colors flex items-center justify-center space-x-1"
+          >
+            <PlayIcon className="w-3 h-3" />
+            <span>Play</span>
+          </button>
+        ) : navigationState?.fromLibrary && content.type === 'tv' ? (
+          // No button for TV shows in library - they're already downloaded, just click to view episodes
+          <div className="w-full py-1.5 px-3 rounded text-xs font-medium bg-gray-600 text-gray-300 text-center">
+            View Episodes
+          </div>
+        ) : (
+          <DownloadButton
+            contentId={content.id}
+            contentType={content.type === 'tv' ? 'tv_show' : 'movie'}
+            title={content.title}
+            downloadStatus={content.download_status}
+            progress={content.download_progress}
+            onDownload={handleDownload}
+            onPause={onPause}
+            onResume={onResume}
+            onCancel={onCancel}
+            onRetry={onRetry}
+            size="sm"
+            variant="ghost"
+            className="w-full text-xs"
+            showProgress={true}
+          />
+        )}
       </div>
 
     </motion.div>

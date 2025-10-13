@@ -85,6 +85,7 @@ const MoviesPage: React.FC = () => {
           title="My Downloaded Movies"
           type="movie"
           category="downloaded"
+          navigationState={{ fromLibrary: true }}
         />
       </div>
     </div>

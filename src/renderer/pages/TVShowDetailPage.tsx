@@ -235,15 +235,18 @@ const SeasonComponent: React.FC<{
             );
             
             return (
-              <div key={episode.episode_number} className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-colors">
+              <div key={episode.episode_number} className={`bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all duration-200 border ${
+                isDownloaded ? 'border-green-500/30 hover:border-green-500/50' : 'border-transparent hover:border-gray-600'
+              }`}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-white">
                     Episode {episode.episode_number}
                   </span>
                   <div className="flex items-center space-x-2">
                     {isDownloaded && (
-                      <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">
-                        Downloaded
+                      <span className="text-xs bg-green-600 text-white px-2 py-1 rounded-full flex items-center space-x-1 font-medium">
+                        <PlayIcon className="w-3 h-3" />
+                        <span>Ready to Play</span>
                       </span>
                     )}
                     <span className="text-xs text-gray-400">
@@ -265,15 +268,45 @@ const SeasonComponent: React.FC<{
                     ★ {episode.vote_average ? episode.vote_average.toFixed(1) : 'N/A'}
                   </span>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-              className="w-full"
-              onClick={() => handleEpisodeDownload(episode.episode_number, episode.name || `Episode ${episode.episode_number}`)}
-              disabled={downloadEpisode.isPending}
-            >
-              {downloadEpisode.isPending ? 'Downloading...' : 'Download'}
-            </Button>
+                {isDownloaded ? (
+                  <Button 
+                    size="sm" 
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-medium transition-all duration-200 flex items-center justify-center space-x-2 hover:scale-105 active:scale-95"
+                    onClick={() => {
+                      // Play functionality for downloaded episodes
+                      console.log('Playing episode:', episode.name);
+                      // TODO: Implement actual media player integration
+                      // For now, show a more polished message
+                      const playMessage = `🎬 Ready to play: ${episode.name}\n\nEpisode ${episode.episode_number} of ${showName}\n\nMedia player integration coming soon!`;
+                      alert(playMessage);
+                    }}
+                  >
+                    <PlayIcon className="w-4 h-4" />
+                    <span>Play Episode</span>
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full hover:bg-gray-700 transition-colors duration-200"
+                    onClick={() => handleEpisodeDownload(episode.episode_number, episode.name || `Episode ${episode.episode_number}`)}
+                    disabled={downloadEpisode.isPending}
+                  >
+                    <div className="flex items-center justify-center space-x-2">
+                      {downloadEpisode.isPending ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border border-gray-300 border-t-transparent"></div>
+                          <span>Downloading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ArrowDownTrayIcon className="w-4 h-4" />
+                          <span>Download</span>
+                        </>
+                      )}
+                    </div>
+                  </Button>
+                )}
           </div>
             );
           }) : (
@@ -437,10 +470,17 @@ const TVShowDetailPage: React.FC = () => {
 
       {/* Action Buttons */}
       <div className="flex items-center space-x-4">
-        <Button size="lg" className="flex items-center space-x-2">
-          <PlayIcon className="w-5 h-5" />
-          <span>Play</span>
-        </Button>
+        {showDownloadedOnly ? (
+          <Button size="lg" className="flex items-center space-x-2 bg-red-600 hover:bg-red-700">
+            <PlayIcon className="w-5 h-5" />
+            <span>Play Downloaded Episodes</span>
+          </Button>
+        ) : (
+          <Button size="lg" className="flex items-center space-x-2">
+            <PlayIcon className="w-5 h-5" />
+            <span>Play</span>
+          </Button>
+        )}
         
         <Button variant="secondary" size="lg" className="flex items-center space-x-2">
           <PlusIcon className="w-5 h-5" />
