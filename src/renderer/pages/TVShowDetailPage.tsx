@@ -1,12 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { PlayIcon, PlusIcon, ArrowDownTrayIcon, ArrowLeftIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { PlayIcon, PlusIcon, ArrowDownTrayIcon, ArrowLeftIcon, FunnelIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
 import FilterToggle from '../components/ui/FilterToggle';
 import { useTVShowDetails, useDownloadTVShow, useTVShowSeason, useDownloadEpisode, useTVShowEpisodes } from '../hooks/useTVShows';
 import { useDownloadModal } from '../contexts/DownloadModalContext';
+
+// Season selector dropdown component
+const SeasonSelector: React.FC<{
+  selectedSeason: number;
+  totalSeasons: number;
+  onSeasonChange: (season: number) => void;
+}> = ({ selectedSeason, totalSeasons, onSeasonChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isOpen && !target.closest('.season-selector')) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
+
+  return (
+    <div className="relative season-selector">
+      <Button
+        variant="outline"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center space-x-2 min-w-[120px] justify-between"
+      >
+        <span>Season {selectedSeason}</span>
+        <ChevronDownIcon className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </Button>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+          {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((season) => (
+            <button
+              key={season}
+              onClick={() => {
+                onSeasonChange(season);
+                setIsOpen(false);
+              }}
+              className={`w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors ${
+                season === selectedSeason ? 'bg-gray-700 text-white' : 'text-gray-300'
+              }`}
+            >
+              Season {season}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Season component to display individual season with episodes
 const SeasonComponent: React.FC<{ 
@@ -15,15 +71,17 @@ const SeasonComponent: React.FC<{
   showName: string; 
   showPosterPath?: string;
   showDownloadedOnly?: boolean;
+  isSelected?: boolean;
 }> = ({ 
   tvId, 
   seasonNumber, 
   showName,
   showPosterPath,
-  showDownloadedOnly = false
+  showDownloadedOnly = false,
+  isSelected = false
 }) => {
-  const { data: season, isLoading, error } = useTVShowSeason(tvId, seasonNumber);
-  const { data: downloadedEpisodes } = useTVShowEpisodes(tvId, seasonNumber, true);
+  const { data: season, isLoading, error } = useTVShowSeason(tvId, seasonNumber, isSelected);
+  const { data: downloadedEpisodes } = useTVShowEpisodes(tvId, seasonNumber, true, isSelected);
   const downloadEpisode = useDownloadEpisode();
   const { openModal } = useDownloadModal();
 
@@ -42,11 +100,11 @@ const SeasonComponent: React.FC<{
     // Open modal immediately with step 1
     const initialData = {
       jobId: `temp_${Date.now()}`,
-      movie: {
+      tvShow: {
         id: tvId,
-        title: `${showName} S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')} - ${episodeName}`,
-        poster_path: showPosterPath || '', // Use the show's poster path
-        release_date: '' // We'll get this from the episode data
+        name: showName,
+        poster_path: showPosterPath || '',
+        first_air_date: '' // We'll get this from the server response
       },
       episode: {
         tvId,
@@ -243,6 +301,9 @@ const TVShowDetailPage: React.FC = () => {
   // Filter state
   const [showDownloadedOnly, setShowDownloadedOnly] = useState(false);
   
+  // Season selection state
+  const [selectedSeason, setSelectedSeason] = useState(1);
+  
   // Set default filter based on navigation source
   useEffect(() => {
     // If coming from library page, default to showing downloaded episodes only
@@ -250,6 +311,39 @@ const TVShowDetailPage: React.FC = () => {
       setShowDownloadedOnly(true);
     }
   }, [location.state]);
+
+  // Auto-select season with latest downloaded episode when downloaded filter is on
+  useEffect(() => {
+    if (showDownloadedOnly && tvId > 0) {
+      // Fetch all downloaded episodes to find the latest season
+      fetch(`http://localhost:3001/api/tv/${tvId}/episodes?downloaded_only=true`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.data.episodes.length > 0) {
+            // Find the season with the latest downloaded episode
+            const latestEpisode = data.data.episodes.reduce((latest: any, episode: any) => {
+              const latestDate = new Date(latest.updatedAt || latest.createdAt);
+              const currentDate = new Date(episode.updatedAt || episode.createdAt);
+              
+              // If dates are equal, prefer higher season/episode number
+              if (currentDate.getTime() === latestDate.getTime()) {
+                if (episode.seasonNumber > latest.seasonNumber) return episode;
+                if (episode.seasonNumber === latest.seasonNumber && episode.episodeNumber > latest.episodeNumber) return episode;
+                return latest;
+              }
+              
+              return currentDate > latestDate ? episode : latest;
+            });
+            
+            console.log('🎯 Auto-selecting season with latest downloaded episode:', latestEpisode.seasonNumber);
+            setSelectedSeason(latestEpisode.seasonNumber);
+          }
+        })
+        .catch(error => {
+          console.error('Failed to fetch downloaded episodes for auto-season selection:', error);
+        });
+    }
+  }, [showDownloadedOnly, tvId]);
 
   // Debug logging
   console.log('🎬 TVShowDetailPage Debug:', {
@@ -362,7 +456,14 @@ const TVShowDetailPage: React.FC = () => {
       {/* Seasons */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">Seasons</h2>
+          <div className="flex items-center space-x-4">
+            <h2 className="text-2xl font-bold text-white">Seasons</h2>
+            <SeasonSelector
+              selectedSeason={selectedSeason}
+              totalSeasons={show.number_of_seasons || 0}
+              onSeasonChange={setSelectedSeason}
+            />
+          </div>
           <div className="flex items-center space-x-4">
             <FilterToggle
               label="Show downloaded episodes only"
@@ -376,16 +477,15 @@ const TVShowDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
-        {Array.from({ length: show.number_of_seasons || 0 }, (_, i) => i + 1).map((season) => (
-          <SeasonComponent
-            key={season}
-            tvId={show.id}
-            seasonNumber={season}
-            showName={show.name || 'TV Show'}
-            showPosterPath={show.poster_path}
-            showDownloadedOnly={showDownloadedOnly}
-          />
-        ))}
+        <SeasonComponent
+          key={selectedSeason}
+          tvId={show.id}
+          seasonNumber={selectedSeason}
+          showName={show.name || 'TV Show'}
+          showPosterPath={show.poster_path}
+          showDownloadedOnly={showDownloadedOnly}
+          isSelected={true}
+        />
       </div>
     </div>
   );

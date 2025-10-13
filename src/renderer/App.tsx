@@ -60,6 +60,8 @@ const GlobalDownloadModal: React.FC = () => {
     <DownloadStatusModal
       isOpen={isOpen}
       movie={downloadData.movie}
+      tvShow={downloadData.tvShow}
+      episode={downloadData.episode}
       steps={downloadData.steps}
       currentStep={downloadData.currentStep}
       progress={downloadData.progress}

@@ -9,11 +9,17 @@ export interface DownloadStatusStep {
 
 export interface DownloadStatusData {
   jobId: string;
-  movie: {
+  movie?: {
     id: number;
     title: string;
     poster_path: string;
     release_date?: string;
+  };
+  tvShow?: {
+    id: number;
+    name: string;
+    poster_path: string;
+    first_air_date?: string;
   };
   episode?: {
     tvId: number;
