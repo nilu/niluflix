@@ -229,10 +229,23 @@ const SeasonComponent: React.FC<{
           }
           
           return episodesToShow.length > 0 ? episodesToShow.map((episode: any) => {
-            // Check if this episode is downloaded
-            const isDownloaded = downloadedEpisodes?.episodes?.some(
+            // Check if this episode is downloaded and get the downloaded episode data
+            const downloadedEpisode = downloadedEpisodes?.episodes?.find(
               (downloadedEp: any) => downloadedEp.episodeNumber === episode.episode_number
             );
+            const isDownloaded = !!downloadedEpisode;
+            
+            // Merge downloaded episode data with TMDB episode data
+            const episodeWithDownloadData = {
+              ...episode,
+              ...(downloadedEpisode && {
+                filePath: downloadedEpisode.filePath,
+                file_path: downloadedEpisode.file_path,
+                downloadStatus: downloadedEpisode.downloadStatus,
+                fileSize: downloadedEpisode.fileSize,
+                downloadProgress: downloadedEpisode.downloadProgress
+              })
+            };
             
             return (
               <div key={episode.episode_number} className={`bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all duration-200 border ${
@@ -273,7 +286,18 @@ const SeasonComponent: React.FC<{
                     size="sm" 
                     className="w-full bg-red-600 hover:bg-red-700 text-white font-medium transition-all duration-200 flex items-center justify-center space-x-2 hover:scale-105 active:scale-95"
                     onClick={async () => {
-                      if (!episode.filePath) {
+                      // Debug: Log the episode object to see what fields are available
+                      console.log('🎬 Episode Debug:', {
+                        name: episodeWithDownloadData.name,
+                        filePath: episodeWithDownloadData.filePath,
+                        file_path: episodeWithDownloadData.file_path,
+                        downloadStatus: episodeWithDownloadData.downloadStatus,
+                        fullEpisode: episodeWithDownloadData
+                      });
+                      
+                      const episodeFilePath = episodeWithDownloadData.filePath || episodeWithDownloadData.file_path;
+                      
+                      if (!episodeFilePath) {
                         alert('Episode file not found. Please re-download this episode.');
                         return;
                       }
@@ -281,10 +305,10 @@ const SeasonComponent: React.FC<{
                       // Import video player service dynamically
                       const { VideoPlayerService } = await import('../services/videoPlayer');
                       
-                      console.log('Playing episode:', episode.name, 'at', episode.filePath);
+                      console.log('Playing episode:', episodeWithDownloadData.name, 'at', episodeFilePath);
                       
                       try {
-                        const result = await VideoPlayerService.playVideo(episode.filePath);
+                        const result = await VideoPlayerService.playVideo(episodeFilePath);
                         if (!result.success) {
                           alert(`Failed to play episode: ${VideoPlayerService.getErrorMessage(result.error)}`);
                         }
