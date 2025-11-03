@@ -15,7 +15,7 @@ const MovieDetailPage: React.FC = () => {
 
   const { data: movie, isLoading, error } = useMovieDetails(movieId);
   const downloadMovie = useDownloadMovie();
-  const { openModal } = useDownloadModal();
+  const { openModal, updateJobId } = useDownloadModal();
 
   const handleDownload = async () => {
     if (movie) {
@@ -68,10 +68,10 @@ const MovieDetailPage: React.FC = () => {
         const result = await downloadMovie.mutateAsync({ id: movie.id });
         console.log('🎬 MovieDetailPage: Download result', result);
         
-        // Update modal with real data from server (including real jobId)
-        if (result && result.data) {
-          console.log('🎬 MovieDetailPage: Updating modal with real jobId');
-          openModal(result.data);
+        // Update jobId with real jobId from API response
+        if (result && result.data && result.data.jobId) {
+          console.log('🎬 MovieDetailPage: Updating jobId to:', result.data.jobId);
+          updateJobId(result.data.jobId);
         }
       } catch (error) {
         console.error('🎬 MovieDetailPage: Download failed', error);

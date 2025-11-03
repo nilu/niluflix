@@ -61,6 +61,7 @@ interface DownloadModalContextType {
   updateSearchCount: (count: number) => void;
   updateCurrentStep: (stepId: string) => void;
   updateStepDescription: (stepId: string, description: string) => void;
+  updateJobId: (jobId: string) => void;
 }
 
 const DownloadModalContext = createContext<DownloadModalContextType | undefined>(undefined);
@@ -155,6 +156,18 @@ export const DownloadModalProvider: React.FC<DownloadModalProviderProps> = ({ ch
     });
   }, []);
 
+  const updateJobId = useCallback((jobId: string) => {
+    console.log('🎬 DownloadModalContext: updateJobId called with:', jobId);
+    setDownloadData(prevData => {
+      if (!prevData) return null;
+      console.log('🎬 DownloadModalContext: Updating jobId from', prevData.jobId, 'to', jobId);
+      return {
+        ...prevData,
+        jobId
+      };
+    });
+  }, []);
+
   return (
     <DownloadModalContext.Provider value={{
       isOpen,
@@ -165,7 +178,8 @@ export const DownloadModalProvider: React.FC<DownloadModalProviderProps> = ({ ch
       updateProgress,
       updateSearchCount,
       updateCurrentStep,
-      updateStepDescription
+      updateStepDescription,
+      updateJobId
     }}>
       {children}
     </DownloadModalContext.Provider>

@@ -46,20 +46,26 @@ class DownloadManager extends events_1.EventEmitter {
     /**
      * Add a new download to the queue
      */
-    async addDownload(content) {
+    async addDownload(content, preFoundTorrents = null) {
         if (!this.isInitialized) {
             await this.initialize();
         }
         const jobId = this.generateJobId();
         logger_1.default.info(`Adding download job: ${jobId} for ${content.title}`);
         try {
-            // Find the best torrent for this content
+            // Use pre-found torrents if provided, otherwise search for them
             let torrents;
-            if (content.type === 'movie') {
-                torrents = await this.torrentSearch.findMovieTorrents(content.title, content.year, 'auto');
-            }
-            else {
-                torrents = await this.torrentSearch.findTVShowTorrents(content.tvShowName || content.title, content.seasonNumber || 1, content.episodeNumber || 1, 'auto');
+            if (preFoundTorrents && preFoundTorrents.length > 0) {
+                console.log(`🎬 Using pre-found torrents for ${content.title} (${preFoundTorrents.length} torrents)`);
+                torrents = preFoundTorrents;
+            } else {
+                console.log(`🎬 Searching for torrents for ${content.title} (no pre-found torrents)`);
+                if (content.type === 'movie') {
+                    torrents = await this.torrentSearch.findMovieTorrents(content.title, content.year, 'auto');
+                }
+                else {
+                    torrents = await this.torrentSearch.findTVShowTorrents(content.tvShowName || content.title, content.seasonNumber || 1, content.episodeNumber || 1, 'auto');
+                }
             }
             if (torrents.length === 0) {
                 throw new Error(`No torrents found for: ${content.title}`);
@@ -245,6 +251,8 @@ class DownloadManager extends events_1.EventEmitter {
             job.status = 'downloading';
             job.startedAt = new Date();
             this.emit('jobStarted', job);
+            // Emit step update for torrent start
+            this.emit('jobStepUpdate', { jobId: job.id, step: 'torrent_start', status: 'active' });
         }
         catch (error) {
             logger_1.default.error(`Failed to start download ${job.id}:`, error);

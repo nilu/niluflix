@@ -40,7 +40,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
 }) => {
   
   const [isHovered, setIsHovered] = React.useState(false);
-  const { openModal } = useDownloadModal();
+  const { openModal, updateJobId } = useDownloadModal();
   
   console.log('🎬 ContentCard: Rendering for', content.title, 'with onDownload:', !!onDownload);
   
@@ -69,14 +69,14 @@ const ContentCard: React.FC<ContentCardProps> = ({
             {
               id: 'movie_details',
               title: 'Getting movie details',
-              description: 'Fetching movie information...',
-              status: 'completed' as const
+              description: `Found "${content.title}" (${content.release_date ? new Date(content.release_date).getFullYear() : content.first_air_date ? new Date(content.first_air_date).getFullYear() : 'Unknown'})`,
+              status: 'active' as const
             },
             {
               id: 'torrent_search',
               title: 'Searching for torrents',
               description: 'Finding available downloads...',
-              status: 'active' as const
+              status: 'pending' as const
             },
             {
               id: 'queue_add',
@@ -89,27 +89,9 @@ const ContentCard: React.FC<ContentCardProps> = ({
               title: 'Starting torrent download',
               description: 'Connecting to peers...',
               status: 'pending' as const
-            },
-            {
-              id: 'downloading',
-              title: 'Downloading',
-              description: 'Download in progress...',
-              status: 'pending' as const
-            },
-            {
-              id: 'organizing',
-              title: 'Organizing files',
-              description: 'Moving files to organized structure',
-              status: 'pending' as const
-            },
-            {
-              id: 'completed',
-              title: 'Download complete',
-              description: 'Ready to watch!',
-              status: 'pending' as const
             }
           ],
-          currentStep: 'torrent_search',
+          currentStep: 'movie_details',
           progress: 0
         };
         
@@ -121,9 +103,10 @@ const ContentCard: React.FC<ContentCardProps> = ({
         const result = await onDownload(contentId, content.type === 'tv' ? 'tv_show' : 'movie', options);
         console.log('🎬 ContentCard: onDownload result:', result);
         
-        // Update modal with real data from API response
-        if (result && (result as any).data && (result as any).data.steps) {
-          openModal((result as any).data);
+        // Update jobId with real jobId from API response
+        if (result && (result as any).data && (result as any).data.jobId) {
+          console.log('🎬 ContentCard: Updating jobId to:', (result as any).data.jobId);
+          updateJobId((result as any).data.jobId);
         }
       } catch (error) {
         console.error('Download failed:', error);
