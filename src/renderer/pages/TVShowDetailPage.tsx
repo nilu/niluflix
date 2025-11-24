@@ -97,7 +97,7 @@ const SeasonComponent: React.FC<{
   const handleEpisodeDownload = async (episodeNumber: number, episodeName: string) => {
     console.log('🎬 Episode download clicked!', { tvId, seasonNumber, episodeNumber });
     
-    // Open modal immediately with step 1
+    // Open modal immediately
     const initialData = {
       jobId: `temp_${Date.now()}`,
       tvShow: {
@@ -112,34 +112,10 @@ const SeasonComponent: React.FC<{
         episodeNumber,
         showName
       },
-      steps: [
-        {
-          id: 'episode_details',
-          title: 'Getting episode details',
-          description: `Found "${episodeName}" (S${seasonNumber.toString().padStart(2, '0')}E${episodeNumber.toString().padStart(2, '0')})`,
-          status: 'active' as const
-        },
-        {
-          id: 'torrent_search',
-          title: 'Searching for torrents',
-          description: 'Finding available downloads...',
-          status: 'pending' as const
-        },
-        {
-          id: 'queue_add',
-          title: 'Adding to download queue',
-          description: 'Preparing download...',
-          status: 'pending' as const
-        },
-        {
-          id: 'torrent_start',
-          title: 'Starting torrent download',
-          description: 'Connecting to peers...',
-          status: 'pending' as const
-        }
-      ],
-      currentStep: 'episode_details',
-      progress: 0
+      steps: [],
+      currentStep: '',
+      progress: 0,
+      message: 'Searching for a torrent...'
     };
     
     console.log('🎬 TVShowDetailPage: Opening modal immediately');

@@ -35,6 +35,7 @@ export interface DownloadStatusData {
   fileSize?: number;
   downloadedSize?: number;
   searchCount?: number; // Number of torrents found so far
+  message?: string; // Simple message to display
   torrentInfo?: {
     title: string;
     seeders: number;
@@ -61,6 +62,7 @@ interface DownloadModalContextType {
   updateSearchCount: (count: number) => void;
   updateCurrentStep: (stepId: string) => void;
   updateStepDescription: (stepId: string, description: string) => void;
+  updateMessage: (message: string) => void;
   updateJobId: (jobId: string) => void;
 }
 
@@ -156,6 +158,16 @@ export const DownloadModalProvider: React.FC<DownloadModalProviderProps> = ({ ch
     });
   }, []);
 
+  const updateMessage = useCallback((message: string) => {
+    setDownloadData(prevData => {
+      if (!prevData) return null;
+      return {
+        ...prevData,
+        message
+      };
+    });
+  }, []);
+
   const updateJobId = useCallback((jobId: string) => {
     console.log('🎬 DownloadModalContext: updateJobId called with:', jobId);
     setDownloadData(prevData => {
@@ -179,6 +191,7 @@ export const DownloadModalProvider: React.FC<DownloadModalProviderProps> = ({ ch
       updateSearchCount,
       updateCurrentStep,
       updateStepDescription,
+      updateMessage,
       updateJobId
     }}>
       {children}

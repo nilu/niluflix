@@ -70,6 +70,7 @@ const GlobalDownloadModal: React.FC = () => {
       fileSize={downloadData.fileSize}
       downloadedSize={downloadData.downloadedSize}
       searchCount={downloadData.searchCount}
+      message={downloadData.message}
       onClose={closeModal}
       onViewDownloads={handleViewDownloads}
     />
